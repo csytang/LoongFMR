@@ -1,0 +1,207 @@
+
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            id="LoongPluginFMRTool.contribution">
+         <menu
+               id="LoongPlugin.FMRTool.FMRecoveryJ"
+               label="LoongFMR"
+               path="additions">
+            <separator
+                  name="group1">
+            </separator>
+            <separator
+                  name="group2">
+            </separator>
+            <separator
+                  name="group3">
+            </separator>
+         </menu>
+         <action
+               class="loongpluginfmrtool.popup.actions.OpenFeatureNameRecommendationView"
+               enablesFor="1"
+               icon="icons/ConfigurationIcon.png"
+               id="LoongPlugin.FMRTool.architecturerecoveryjava"
+               label="Open Feature Configuration Editor"
+               menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group1">
+         </action>
+         <action
+               class="loongpluginfmrtool.popup.actions.OpenFeatureNameRecommendationView"
+               icon="icons/recommend.png"
+               id="LoongPluginFMRTool.recommendName"
+               label="Open Feature Name Recommendation View"
+               menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group1">
+         </action>
+         <action
+               class="loongpluginfmrtool.popup.actions.RecoveryFeatureModelBunch"
+               icon="icons/arch.png"
+               id="LoongPluginFMRTool.featurerecoveryBunch"
+               label="Recovery Feature Model with Bunch"
+               menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group1">
+         </action>
+         <action
+               class="loongpluginfmrtool.popup.actions.RecoveryFeatureModelACDC"
+               icon="icons/arch.png"
+               id="LoongPluginFMRTool.featurerecoveryACDC"
+               label="Recovery Feature Model with ACDC"
+               menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group1">
+         </action>
+         <action
+               class="loongpluginfmrtool.popup.actions.RecoveryFeatureModelLIMBO"
+               icon="icons/arch.png"
+               id="LoongPluginFMRTool.featurerecoveryLIMBO"
+               label="Recovery Feature Model with LIMBO"
+               menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group1">
+         </action>
+         <action
+               class="loongpluginfmrtool.popup.actions.RecoveryFeatureModelVMS"
+               icon="icons/arch.png"
+               id="LoongPluginFMRTool.featurerecoveryVMS"
+               label="Recovery Feature Model with Variability Modelling"
+               menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group1">
+         </action>
+         <action
+               class="loongpluginfmrtool.popup.actions.RecoveryFeatureModelARC"
+               icon="icons/arch.png"
+               id="LoongPluginFMRTool.featurerecoveryARC"
+               label="Recovery Feature Model with ArchRecoveryConcern"
+               menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group1">
+         </action>
+         <action
+               class="loongpluginfmrtool.popup.actions.RecoveryFeatureModelWCA"
+               icon="icons/arch.png"
+               id="LoongPluginFMRTool.featurerecoveryWCA"
+               label="Recovery Feature Model with Weighted Clustering Algorithm"
+               menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group1">
+         </action>
+         <action
+               class="loongpluginfmrtool.popup.actions.BuildModules"
+               icon="icons/macro.ico"
+               id="LoongPluginFMRTool.modulebuilder"
+               label="Build #ifdef modules"
+               menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group1">
+         </action>
+         <action
+               class="loongpluginfmrtool.popup.actions.CreateMDGFile"
+               icon="icons/mpgtoolbox.png"
+               id="LoongPluginFMRTool.bunchtool"
+               label="Generate MDG file (Bunch Toolbox)"
+               menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group2">
+         </action>
+         <action
+               class="loongpluginfmrtool.popup.actions.GenerateGroundTruth"
+               icon="icons/groundtruth.jpg"
+               id="LoongPluginFMRTool.generateGroundTruth"
+               label="Generate Ground-Truth"
+               menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group2">
+         </action>
+         <action
+               class="loongpluginfmrtool.popup.actions.GenerateJavaRigiSF"
+               id="LoongPluginFMRTool.rigistandardfile"
+               label="Generate Rigi Standard File for this Project(ACDC/ARC Toolbox)"
+               menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group2">
+         </action>
+         <action
+               class="loongpluginfmrtool.popup.actions.BatchBunchToRSF"
+               id="LoongPluginFMRTool.bunchtoRSF"
+               label="Batch Transform Bunch Files to RSF"
+               menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group2">
+         </action>
+         <action
+               class="loongpluginfmrtool.popup.actions.MoJoMeasure"
+               id="LoongPluginFMRTool.actionMoJoFM"
+               label="MoJoFM Measuring"
+               menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group3">
+         </action>
+         <action
+               class="loongpluginfmrtool.popup.actions.a2aMeasure"
+               id="LoongPluginFMRTool.actionArch2ArchMeasure"
+               label="Arch2Arch Measuring"
+               menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group3">
+         </action>
+         <action
+               class="loongpluginfmrtool.popup.actions.cluster2clusterMeasure"
+               id="LoongPluginFMRTool.actioncluster2cluster"
+               label="Cluster2Cluster Measuring"
+               menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group3">
+         </action>
+      </objectContribution>
+      <objectContribution
+            adaptable="false"
+            id="LoongPluginFMRTool.objectContributioncpp"
+            objectClass="org.eclipse.cdt.core.model.ICProject">
+         <menu
+               id="LoongPlugin.FMRTool.FMRecoveryC"
+               label="LoongFMR"
+               path="additions">
+            <separator
+                  name="group1">
+            </separator>
+         </menu>
+         <action
+               class="loongpluginsartool.popup.actions.CPPProjectSARecovery"
+               icon="icons/ConfigurationIcon.png"
+               id="LoongPluginSARTool.architecturerecoverycpp"
+               label="Open Feature Configuration Editor"
+               menubarPath="LoongPlugin.FMRTool.FMRecoveryC/group1">
+         </action>
+      </objectContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="loongpluginfmrtool.editor.configfeaturemodeleditor.ui.ConfigurableFeatureModelEditor"
+            contributorClass="loongpluginfmrtool.editor.configfeaturemodeleditor.actions.DiagramActionBarContributor"
+            default="true"
+            extensions="mconfig"
+            icon="icons/mconfig.gif"
+            id="LoongPlugin.FMRTool.mConfigFeatureModelEditor"
+            name="Configurable Feature Model Editor">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            allowMultiple="false"
+            category="LoongPlugin.viewcategory"
+            class="loongpluginfmrtool.views.recommendedfeatureview.RecommendedFeatureView"
+            icon="icons/recommend.png"
+            id="LoongPlugin.FMRTool.recommendedFeatureList"
+            name="Recommended Feature List"
+            restorable="true">
+      </view>
+      <category
+            id="LoongPlugin.viewcategory"
+            name="Loong">
+      </category>
+      <view
+            category="LoongPlugin.viewcategory"
+            class="loongpluginfmrtool.views.moduleviews.ModuleViewPart"
+            icon="icons/module.png"
+            id="LoongPlugin.FMRTool.ModuleView"
+            name="Modules with Configurations"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <wizard
+            category="LoongPlugin.newwizard"
+            class="loongpluginfmrtool.newWizard.MConfigFileWizard"
+            icon="icons/ConfigurationFileSmall.png"
+            id="LoongPluginSARTool.mConfigFeatureModelwizard"
+            name="Temprorary Configurable Feature Model">
+      </wizard>
+   </extension>
+   <extension
+         id="id1"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+   </extension>
+
+</plugin>
