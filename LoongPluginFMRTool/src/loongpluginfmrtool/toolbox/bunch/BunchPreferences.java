@@ -32,8 +32,7 @@ import loongpluginfmrtool.toolbox.bunch.ParserFactory;
  * @author Brian Mitchell
  */
 public
-class BunchPreferences
-  implements java.io.Serializable
+class BunchPreferences implements java.io.Serializable
 {
 
 /**

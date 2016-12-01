@@ -68,14 +68,7 @@ public class RecoveryFeatureModelBunch implements IObjectActionDelegate {
 			
 	        //.out.println("Finish Module Helper");
 			Bunch bunch = new Bunch();
-			/*
-			if(aProject.getFile(aProject.getName()+".mdg").exists()){
-				//IFile mdgfile = aProject.getFile(aProject.getName()+".mdg");
-				
-				File mdgfile = new File(projectPath+File.separatorChar+aProject.getName()+".mdg");
-				bunch.setInputMDGFile(mdgfile,projectPath);
-				
-			}*/
+			
 		}
 		
 	}

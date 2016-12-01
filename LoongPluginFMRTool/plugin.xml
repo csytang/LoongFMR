@@ -149,6 +149,25 @@
                menubarPath="LoongPlugin.FMRTool.FMRecoveryC/group1">
          </action>
       </objectContribution>
+      <objectContribution
+            adaptable="false"
+            id="LoongPluginFMRTool.resourceContribution"
+            objectClass="org.eclipse.core.resources.IResource">
+         <action
+               class="loongpluginfmrtool.popup.actions.FeatureCountAction"
+               id="LoongPluginFMRTool.featureCount"
+               label="Count num. of feature in this file"
+               menubarPath="LoongPlugin.FMRTool.Resource/resourcegroup">
+         </action>
+         <menu
+               id="LoongPlugin.FMRTool.Resource"
+               label="LoongFRM"
+               path="additions">
+            <separator
+                  name="resourcegroup">
+            </separator>
+         </menu>
+      </objectContribution>
    </extension>
    <extension
          point="org.eclipse.ui.editors">

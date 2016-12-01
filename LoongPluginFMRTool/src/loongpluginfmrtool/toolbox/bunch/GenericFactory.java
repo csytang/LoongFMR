@@ -136,9 +136,7 @@ getItemList()
  * @param name the name of the object which FQN is to be retrieved
  * @return the item stored for the key received as parameter
  */
-public
-String
-getItemName(String name)
+public String  getItemName(String name)
 {
   return (String)methodTable_d.get(name);
 }
