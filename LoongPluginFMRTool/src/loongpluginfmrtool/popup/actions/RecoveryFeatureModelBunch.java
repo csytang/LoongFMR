@@ -6,7 +6,6 @@ import java.util.Iterator;
 import loongplugin.source.database.ApplicationObserver;
 import loongpluginfmrtool.module.builder.ModuleBuilder;
 import loongpluginfmrtool.toolbox.acdc.ACDCConfigurationDialog;
-import loongpluginfmrtool.toolbox.bunch.Bunch;
 import loongpluginfmrtool.views.moduleviews.ModuleViewPart.ModuleModelChangeListener;
 
 import org.eclipse.core.resources.IFile;
@@ -25,6 +24,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
+
+import bunch.Bunch;
 
 public class RecoveryFeatureModelBunch implements IObjectActionDelegate {
 

@@ -14,7 +14,7 @@ import loongplugin.source.database.ApplicationObserver;
 import loongpluginfmrtool.module.builder.ModuleBuilder;
 import loongpluginfmrtool.module.featuremodelbuilder.ModuleDependencyTable;
 import loongpluginfmrtool.module.model.Module;
-import loongpluginfmrtool.toolbox.bunch.MDGFileConfig;
+import loongpluginfmrtool.util.MDGFileConfig;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
