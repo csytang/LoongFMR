@@ -77,6 +77,7 @@ package bunch;
 
 import bunch.BunchServer.BunchSvrMsg;
 import bunch.stats.*;
+import edu.usc.softarch.arcade.util.StopWatch;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -99,8 +100,7 @@ import javax.swing.event.*;
  * @see bunch.Bunch.main(String[])
  */
 public
-class BunchFrame
-  extends JFrame
+class BunchFrame extends JFrame
 {
 /**
  * Constants for BunchFrame
@@ -867,11 +867,9 @@ setClusteringMethod(String method)
 /**
  * Method that is executed when the Exit option in the File menu is called.
  */
-public
-void
-fileExit_actionPerformed(ActionEvent e)
-{
-  System.exit(0);
+public void fileExit_actionPerformed(ActionEvent e) {
+  //System.exit(0);
+	this.dispose();
 }
 
 /**
@@ -1218,9 +1216,7 @@ public CallbackImpl getSvrCallback()
  *
  * @param e the ActionEvent that triggered the method call
  */
-void
-runActionButton_d_actionPerformed(ActionEvent e)
-{
+void runActionButton_d_actionPerformed(ActionEvent e) {
 
   /**
    * First ensure that an input graph is specified
@@ -1249,6 +1245,10 @@ runActionButton_d_actionPerformed(ActionEvent e)
     initialGraph_d.setDoubleLocks(true);
   }
 
+  StopWatch stopwatch = new StopWatch();
+
+	stopwatch.start();
+	
   int[] clust = initialGraph_d.getClusters();
   boolean[] locks = initialGraph_d.getLocks();
   for (int i=0; i<clust.length; ++i) {
@@ -1416,6 +1416,16 @@ runActionButton_d_actionPerformed(ActionEvent e)
       if (outputFileFormatList_d.getSelectedItem().equals("Dotty"))
          visualizeButton_d.setEnabled(true);
     }
+  stopwatch.stop();
+
+	// Statistics
+	String timeInSecsToComputeClusters = "Time in seconds to compute clusters: "
+			+ stopwatch.getElapsedTimeSecs();
+	String timeInMilliSecondsToComputeClusters = "Time in milliseconds to compute clusters: "
+			+ stopwatch.getElapsedTime();
+	System.out.println(timeInSecsToComputeClusters);
+	System.out.println(timeInMilliSecondsToComputeClusters);
+	System.out.println("Finish clustering");
 }
 
 /**

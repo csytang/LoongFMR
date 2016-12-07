@@ -195,7 +195,7 @@ public Object getItemInstanceFromClass(String cls)
 {
   Object obj = null;
   
-  System.out.println("Get item instance from Class:"+cls);
+ // System.out.println("Get item instance from Class:"+cls);
 
   switch(cls){
   case "dependency":{

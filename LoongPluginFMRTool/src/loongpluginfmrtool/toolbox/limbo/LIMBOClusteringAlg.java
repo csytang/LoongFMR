@@ -134,7 +134,7 @@ public class LIMBOClusteringAlg {
 			
 		}
 		
-		
+		System.out.println("Run LIMBO clustering");
 		FeatureVectorMap fvMap = new FeatureVectorMap(typedEdgeGraph);
 		ffVecs = fvMap.convertToFastFeatureVectors();
 		
@@ -144,11 +144,11 @@ public class LIMBOClusteringAlg {
 		LimboRunner.setFastFeatureVectors(ffVecs);
 		
 		StopWatch stopwatch = new StopWatch();
-
+		
 		stopwatch.start();
-		
+		System.out.println("Run LIMBO start");
 		LimboRunner.computeClusters(new PreSelectedStoppingCriterion());
-		
+		System.out.println("Run LIMBO end");
 		stopwatch.stop();
 
 		// Statistics

@@ -13,7 +13,6 @@ import edu.usc.softarch.arcade.util.StopWatch;
 
 public class LimboRunner extends ClusteringAlgoRunner {
 	
-	private static Logger logger = Logger.getLogger(LimboRunner.class);
 
 	public static void computeClusters(StoppingCriterion stopCriterion) {
 		StopWatch loopSummaryStopwatch = new StopWatch();
@@ -21,14 +20,14 @@ public class LimboRunner extends ClusteringAlgoRunner {
 		initializeClusters(null);
 
 		// SimCalcUtil.verifySymmetricClusterOrdering(clusters);
-
+		System.out.println("Finish initialize");
 		loopSummaryStopwatch.start();
 		
 		StopWatch matrixCreateTimer = new StopWatch();
 		matrixCreateTimer.start();
 		List<List<Double>> simMatrix = createSimilarityMatrix(fastClusters);
 		matrixCreateTimer.stop();
-		logger.debug("time to create similarity matrix: "
+		System.out.println("time to create similarity matrix: "
 				+ matrixCreateTimer.getElapsedTime());
 
 		int clusterStepCount = 0;
@@ -49,7 +48,7 @@ public class LimboRunner extends ClusteringAlgoRunner {
 			//identifyMostSimClustersForConcernsMultiThreaded(data);
 			MaxSimData data  = identifyMostSimClusters(simMatrix);
 			timer.stop();
-			logger.debug("time to identify two most similar clusters: "
+			System.out.println("time to identify two most similar clusters: "
 					+ timer.getElapsedTime());
 			
 			printTwoMostSimilarClustersUsingStructuralData(data);
@@ -67,7 +66,7 @@ public class LimboRunner extends ClusteringAlgoRunner {
 				if (clusterStepCount == stepCountToStop) {
 					loopSummaryStopwatch.stop();
 
-					logger.debug("Time in milliseconds to compute clusters after priority queue initialization: "
+					System.out.println("Time in milliseconds to compute clusters after priority queue initialization: "
 							+ loopSummaryStopwatch.getElapsedTime());
 
 					DebugUtil.earlyExit();
@@ -79,10 +78,10 @@ public class LimboRunner extends ClusteringAlgoRunner {
 
 		loopSummaryStopwatch.stop();
 
-		logger.debug("Time in milliseconds to compute clusters after priority queue initialization: "
+		System.out.println("Time in milliseconds to compute clusters after priority queue initialization: "
 				+ loopSummaryStopwatch.getElapsedTime());
-		logger.debug("max cluster gain: " + maxClusterGain);
-		logger.debug("num clusters at max cluster gain: "
+		System.out.println("max cluster gain: " + maxClusterGain);
+		System.out.println("num clusters at max cluster gain: "
 				+ numClustersAtMaxClusterGain);
 
 	}
@@ -162,21 +161,21 @@ public class LimboRunner extends ClusteringAlgoRunner {
 	}
 	
 	protected static void printTwoMostSimilarClustersUsingStructuralData(
-			MaxSimData maxSimData) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("In, "
+		MaxSimData maxSimData) {
+		
+			System.out.println("In, "
 					+ Thread.currentThread().getStackTrace()[1].getMethodName()
 					+ ", \nMax Similar Clusters: ");
 
 			ClusterUtil.printSimilarFeatures(fastClusters.get(maxSimData.rowIndex), fastClusters.get(maxSimData.colIndex),
 					fastFeatureVectors);
 
-			logger.debug(maxSimData.currentMaxSim);
-			logger.debug("\n");
+			System.out.println(maxSimData.currentMaxSim);
+			System.out.println("\n");
 
-			logger.debug("before merge, clusters size: " + fastClusters.size());
+			System.out.println("before merge, clusters size: " + fastClusters.size());
 			
-		}
+		
 	}
 	
 	private static MaxSimData identifyMostSimClusters(

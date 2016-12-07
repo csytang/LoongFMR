@@ -1,16 +1,12 @@
 package loongpluginfmrtool.toolbox.mvs;
 
-import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import java.util.Vector;
-
 import loongpluginfmrtool.module.featuremodelbuilder.ModuleDependencyTable;
 import loongpluginfmrtool.module.model.Module;
 
@@ -115,7 +111,7 @@ public class FitnessCalc {
 
 	public double getInformationLoss() {
 		// TODO Auto-generated method stub
-		return informationloss;
+		return informationloss;		
 	}
 	
 	

@@ -61,14 +61,15 @@ public class ClusteringAlgoRunner {
 		}
 
 		System.out.println("Listing initial cluster names using for-each...");
+		/*
 		for (FastCluster cluster : fastClusters) {
 			System.out.println(cluster.getName());
-		}
+		}*/
 
 		System.out.println("Listing initial cluster names using indexed loop...");
 		for (int i = 0; i < fastClusters.size(); i++) {
 			FastCluster cluster = (FastCluster) fastClusters.get(i);
-			System.out.println(cluster.getName());
+			//System.out.println(cluster.getName());
 		}
 
 		numberOfEntitiesToBeClustered = fastClusters.size();
