@@ -84,8 +84,6 @@ public class GAIndividual {
 		if (fitness == 0) {
 			FitnessCalc cal = new FitnessCalc();
             fitness = cal.getFitnessValue(this,clustering.getIndextoModule(),clustersize);
-            informationlosscount = cal.getInformationLoss();
-            modulequalitycount = cal.getModuleQuality();
             variabilitygain = cal.getVariabilityLoss();
         }
         return fitness;
@@ -105,14 +103,7 @@ public class GAIndividual {
 		// TODO Auto-generated method stub
 		return variabilitygain;
 	}
-	public double getInformationLoss() {
-		// TODO Auto-generated method stub
-		return informationlosscount;
-	}
-	public double getModuleQuality() {
-		// TODO Auto-generated method stub
-		return modulequalitycount;
-	}
+	
 	
 	
 	

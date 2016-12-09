@@ -19,9 +19,7 @@ public class FitnessCalc {
 	private Map<Integer,Set<ModuleWrapper>>clusterToModules = new HashMap<Integer,Set<ModuleWrapper>>();// 类id 到 类内 module
 	private Map<Integer,Module>indexToModules = new HashMap<Integer,Module>();
 	private List<Set<ModuleWrapper>>listedWrapperGroup = new LinkedList<Set<ModuleWrapper>>();
-	private double informationloss = 0.0;
 	private double variabilitygain = 0.0;
-	private double modularityvalue = 0.0;
 	
 	public double getFitnessValue(GAIndividual gaIndividual,Map<Integer, Module>pindexToModule,int cluster) {
 		// TODO Auto-generated method stub
@@ -32,7 +30,7 @@ public class FitnessCalc {
 		dependency_table = gaIndividual.getGeneClustering().getDependencyTable();
 		indexToModules = pindexToModule;
 		clustercount = cluster;
-		//convert the indextoModuel 
+		// convert the indextoModuel 
 		/**
 		 * mdid : the id of the module
 		 * mdcluster: the id of the cluster
@@ -55,13 +53,8 @@ public class FitnessCalc {
 			}
 		}
 		//////////////////////////////////////////////////////////////////////////////////////////
-		modularityvalue = 0.0;
+		
 		variabilitygain = 0.0;
-		double intramodularity = 0.0;
-		double intermodularity = 0.0;
-		
-		informationloss = 0.0;
-		
 		
 		for(Map.Entry<Integer, Set<ModuleWrapper>>entry:clusterToModules.entrySet()){
 			Set<ModuleWrapper> wrapperset = entry.getValue();
@@ -69,32 +62,9 @@ public class FitnessCalc {
 			// variability loss
 			double variabilitylossiteration = VariabilityLoss.computeVLossPos(wrapperset);
 			variabilitygain+=variabilitylossiteration;
-			
-			ModuleQualityMetrics metrics = new ModuleQualityMetrics(wrapperset);
-			intramodularity+=metrics.getIntraConnectMSet1();
-			listedWrapperGroup.add(wrapperset);
-			
-			//information loss 
-			InformationLossCalc infolosscal = new InformationLossCalc();
-			informationloss+=infolosscal.computeILNeg(wrapperset, dependency_table, indexToModules);
-			
 		}
 		
-		intramodularity = intramodularity / clustercount;
-		for(int i= 0;i < listedWrapperGroup.size();i++){
-			Set<ModuleWrapper> wrapperseti = listedWrapperGroup.get(i);
-			for(int j = i+1;j < listedWrapperGroup.size();j++){
-				Set<ModuleWrapper> wrappersetj = listedWrapperGroup.get(j);
-				ModuleQualityMetrics metrics = new ModuleQualityMetrics(wrapperseti,wrappersetj);
-				intermodularity+=metrics.getInterConnect();
-			}
-		}
-		intermodularity = intermodularity/ (clustercount*(clustercount-1)/2);
-		
-		modularityvalue = intramodularity-intermodularity;
-		
-		fitness = modularityvalue-informationloss+variabilitygain;
-		//fitness = modularityvalue-informationloss;
+		fitness = variabilitygain;
 		
 		return fitness;
 	}
@@ -104,15 +74,7 @@ public class FitnessCalc {
 		return variabilitygain;
 	}
 
-	public double getModuleQuality() {
-		// TODO Auto-generated method stub
-		return modularityvalue;
-	}
-
-	public double getInformationLoss() {
-		// TODO Auto-generated method stub
-		return informationloss;		
-	}
+	
 	
 	
 

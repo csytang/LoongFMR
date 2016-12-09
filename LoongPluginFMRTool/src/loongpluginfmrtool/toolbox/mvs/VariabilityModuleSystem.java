@@ -53,8 +53,7 @@ public class VariabilityModuleSystem {
 			population = clustering.evolvePopulation(population);
 			if(debug){
 				GAIndividual fitnessind = population.getFittest();
-				System.out.println(fitnessind.getFitness()+"["+"VL:"+fitnessind.getVariabilityLoss()+"\t IL:"+fitnessind.getInformationLoss()+
-						"\t MQ:"+fitnessind.getModuleQuality()+"]");
+				System.out.println(fitnessind.getFitness()+"["+"VL:"+fitnessind.getVariabilityLoss()+"]");
 			}
 		}
 		translatePopulation(population.getFittest(),cluster,indexToModule);
