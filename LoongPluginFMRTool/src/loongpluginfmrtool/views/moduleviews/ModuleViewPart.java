@@ -55,7 +55,6 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.internal.Workbench;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 public class ModuleViewPart extends ViewPart {
 /**
