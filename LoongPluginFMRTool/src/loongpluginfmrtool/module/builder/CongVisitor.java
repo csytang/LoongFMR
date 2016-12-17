@@ -8,17 +8,27 @@ import java.util.Set;
 
 import loongpluginfmrtool.module.model.ConfigurationOption;
 import loongpluginfmrtool.module.model.Module;
+import loongpluginfmrtool.util.ASTNodeHelper;
+import loongpluginfmrtool.util.ASTVisitorHelper;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.WhileStatement;
+
+import loongplugin.source.database.model.LFlyweightElementFactory;
 
 public class CongVisitor extends ASTVisitor{
 
@@ -26,9 +36,14 @@ public class CongVisitor extends ASTVisitor{
 	
 	private Module associatemdule;
 	private MethodDeclaration methoddecl;
-	public CongVisitor(Module mainmodule,MethodDeclaration pmethoddecl){
+	private LFlyweightElementFactory aLElementFactory;
+	private Map<ASTNode,ConfigurationOption>configuration_map_ASTNodesOption = new HashMap<ASTNode,ConfigurationOption>();
+	
+	
+	public CongVisitor(Module mainmodule,MethodDeclaration pmethoddecl,LFlyweightElementFactory pLElementFactory){
 		associatemdule = mainmodule;
 		methoddecl = pmethoddecl;
+		aLElementFactory = pLElementFactory;
 	}
 	
 	public boolean visit(IfStatement node) {
@@ -36,16 +51,34 @@ public class CongVisitor extends ASTVisitor{
 		Expression condition = if_node.getExpression();
 		Statement then_statement = if_node.getThenStatement();
 		Statement else_statement = if_node.getElseStatement();
-		ConfigurationOption option = new ConfigurationOption(condition,associatemdule,methoddecl);
-		if(then_statement!=null){
-			configurationOptions.add(option);
-			option.addEnable_Statements(then_statement);
+		Set<ASTNode> astnodes = ConfigurationEntryFinder.getConfigurations(if_node,aLElementFactory);
+		for(ASTNode astnode:astnodes){
+			
+			ConfigurationOption option = createConfigurationOption(astnode,condition,associatemdule,methoddecl);
+			assert option!=null;
+			if(then_statement!=null){
+				//configurationOptions.add(option);
+				option.addEnable_Statements(condition,then_statement);
+			}
+			if(else_statement!=null){
+				//configurationOptions.add(option);
+				option.addDisable_Statements(condition,else_statement);
+			}else{
+				// in the if statement there is a return, then the code rests are else
+				boolean hasreturn = ASTVisitorHelper.containsReturn(then_statement);
+				if(hasreturn){
+					ASTNode parentnode = node.getParent();
+					assert parentnode instanceof Statement;
+					Statement parentstatement = (Statement)parentnode;
+					Set<Statement> state_after_if_node = ASTNodeHelper.getStatementAfter(if_node,parentstatement);
+					state_after_if_node.remove(then_statement);
+					for(Statement state_after:state_after_if_node){
+						option.addDisable_Statements(condition,state_after);
+					}
+				}
+				
+			}
 		}
-		if(else_statement!=null){
-			configurationOptions.add(option);
-			option.addDisable_Statements(else_statement);
-		}
-		
 		return true;
     }
 
@@ -53,11 +86,14 @@ public class CongVisitor extends ASTVisitor{
     	WhileStatement while_statement = (WhileStatement)node;
     	Expression condition = while_statement.getExpression();
     	Statement body = while_statement.getBody();
-    	ConfigurationOption option = new ConfigurationOption(condition,associatemdule,methoddecl);
-    	if(body!=null){
-    		configurationOptions.add(option);
-    		option.addEnable_Statements(body);
-    	}
+    	Set<ASTNode> astnodes = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
+		for(ASTNode astnode:astnodes){
+			ConfigurationOption option = createConfigurationOption(astnode,condition,associatemdule,methoddecl);
+			if(body!=null){
+	    		//configurationOptions.add(option);
+	    		option.addEnable_Statements(condition,body);
+	    	}
+		}
     	return true;
     }
 
@@ -67,12 +103,14 @@ public class CongVisitor extends ASTVisitor{
     	DoStatement do_statement = (DoStatement) node;
     	Expression condition = do_statement.getExpression();
     	Statement body = do_statement.getBody();
-    	ConfigurationOption option = new ConfigurationOption(condition,associatemdule,methoddecl);
-    	if(body!=null){
-    		configurationOptions.add(option);
-    		option.addEnable_Statements(body);
-    	}
-    	
+    	Set<ASTNode> astnodes = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
+		for(ASTNode astnode:astnodes){
+	    	ConfigurationOption option = createConfigurationOption(astnode,condition,associatemdule,methoddecl);
+	    	if(body!=null){
+	    		//configurationOptions.add(option);
+	    		option.addEnable_Statements(condition,body);
+	    	}
+		}
         return true;
 	}
     
@@ -81,11 +119,14 @@ public class CongVisitor extends ASTVisitor{
 		EnhancedForStatement enhance_statement = (EnhancedForStatement)node;
 		Expression condition = enhance_statement.getExpression();
 		Statement body = enhance_statement.getBody();
-    	ConfigurationOption option = new ConfigurationOption(condition,associatemdule,methoddecl);
-		if(body!=null){
-			configurationOptions.add(option);
-    		option.addEnable_Statements(body);
-    	}
+		Set<ASTNode> astnodes = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
+		for(ASTNode astnode:astnodes){
+	    	ConfigurationOption option = createConfigurationOption(astnode,condition,associatemdule,methoddecl);
+			if(body!=null){
+				//configurationOptions.add(option);
+	    		option.addEnable_Statements(condition,body);
+	    	}
+		}
         return true;
 	}
 	
@@ -94,10 +135,13 @@ public class CongVisitor extends ASTVisitor{
 		ForStatement for_statement  = (ForStatement)node;
 		Expression condition = for_statement.getExpression();
 		Statement body = for_statement.getBody();
-    	ConfigurationOption option = new ConfigurationOption(condition,associatemdule,methoddecl);
-		if(body!=null){
-			configurationOptions.add(option);
-    		option.addEnable_Statements(body);
+		Set<ASTNode> astnodes = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
+		for(ASTNode astnode:astnodes){
+	    	ConfigurationOption option = createConfigurationOption(astnode,condition,associatemdule,methoddecl);
+			if(body!=null){
+				//configurationOptions.add(option);
+	    		option.addEnable_Statements(condition,body);
+			}
 		}
         return true;
 	}
@@ -107,16 +151,17 @@ public class CongVisitor extends ASTVisitor{
 	public boolean visit(SwitchStatement node) {
 		SwitchStatement switch_node = (SwitchStatement)node;
 		Expression condition = switch_node.getExpression();
-    	ConfigurationOption option = new ConfigurationOption(condition,associatemdule,methoddecl);
-    	List<Statement> sub_statements = switch_node.statements();
-    	if(sub_statements!=null){
-    		if(!sub_statements.isEmpty()){
-    			configurationOptions.add(option);
-    			for(Statement sub_statement:sub_statements){
-    	    		option.addEnable_Statements(sub_statement);
-    			}
-    		}
-    	}
+		Set<ASTNode> astnodes = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
+		for(ASTNode astnode:astnodes){
+	    	ConfigurationOption option = createConfigurationOption(astnode,condition,associatemdule,methoddecl);
+	    	List<Statement> sub_statements = switch_node.statements();
+	    	if(sub_statements!=null){
+	    		if(!sub_statements.isEmpty()){
+	    			Set<Statement>sub_statementset = new HashSet<Statement>(sub_statements);
+	    			option.addEnable_Statements(condition,sub_statementset);
+	    		}
+	    	}
+		}
 		return true;
 	}
 
@@ -126,5 +171,55 @@ public class CongVisitor extends ASTVisitor{
 	}
 
 	
-	
+	public ConfigurationOption createConfigurationOption(ASTNode node,Expression condition,Module associatemdule,MethodDeclaration methoddecl){
+		ConfigurationOption option = null;
+		if(node instanceof VariableDeclaration){
+			VariableDeclaration variable = (VariableDeclaration)node;
+			if(configuration_map_ASTNodesOption.containsKey(node)){
+				return configuration_map_ASTNodesOption.get(node);
+			}else{
+				option = new ConfigurationOption(variable,condition,associatemdule,methoddecl);
+				configuration_map_ASTNodesOption.put(node, option);
+				configurationOptions.add(option);
+			}
+		}else if(node instanceof FieldDeclaration){
+			FieldDeclaration field = (FieldDeclaration)node;
+			if(configuration_map_ASTNodesOption.containsKey(node)){
+				return configuration_map_ASTNodesOption.get(node);
+			}else{
+				option = new ConfigurationOption(field,condition,associatemdule,methoddecl);
+				configuration_map_ASTNodesOption.put(node, option);
+				configurationOptions.add(option);
+			}
+		}else if(node instanceof EnumDeclaration){
+			EnumDeclaration enumdecl = (EnumDeclaration)node;
+			if(configuration_map_ASTNodesOption.containsKey(node)){
+				return configuration_map_ASTNodesOption.get(node);
+			}else{
+				option = new ConfigurationOption(enumdecl,condition,associatemdule,methoddecl);
+				configuration_map_ASTNodesOption.put(node, option);
+				configurationOptions.add(option);
+			}
+		}else if(node instanceof MethodDeclaration){
+			MethodDeclaration methdecl = (MethodDeclaration)node;
+			if(configuration_map_ASTNodesOption.containsKey(node)){
+				return configuration_map_ASTNodesOption.get(node);
+			}else{
+				option = new ConfigurationOption(methdecl,condition,associatemdule);
+				configuration_map_ASTNodesOption.put(node, option);
+				configurationOptions.add(option);
+			}
+		}else if(node instanceof TypeDeclaration){
+			TypeDeclaration typedecl = (TypeDeclaration)node;
+			if(configuration_map_ASTNodesOption.containsKey(node)){
+				return configuration_map_ASTNodesOption.get(node);
+			}else{
+				option = new ConfigurationOption(typedecl,condition,associatemdule,methoddecl);
+				configuration_map_ASTNodesOption.put(node, option);
+				configurationOptions.add(option);
+			}
+		}
+		
+		return option;
+	}
 }

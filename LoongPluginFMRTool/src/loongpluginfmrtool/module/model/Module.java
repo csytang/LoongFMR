@@ -26,8 +26,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import loongplugin.color.coloredfile.CLRAnnotatedSourceFile;
 import loongplugin.source.database.model.LElement;
 import loongplugin.source.database.model.LFlyweightElementFactory;
-import loongpluginfmrtool.module.builder.ExternalConfBuilder;
-import loongpluginfmrtool.module.builder.InternalConfBuilder;
+import loongpluginfmrtool.module.builder.ConfTractor;
 import loongpluginfmrtool.module.builder.ModuleBuilder;
 import loongpluginfmrtool.module.builder.ModuleDependencyBuilder;
 import loongpluginfmrtool.module.featuremodelbuilder.ModuleHelper;
@@ -43,8 +42,7 @@ public class Module implements Serializable {
 	private LFlyweightElementFactory lElementfactory;
 	private ASTNode dominateASTNode;
 	private ModuleBuilder abuilder;
-	private InternalConfBuilder contflowbuilder;
-	private ExternalConfBuilder externalconfbuilder;
+	private ConfTractor contflowbuilder;
 	private Map<LElement,Set<ConfigurationOption>> method_configurations = new HashMap<LElement,Set<ConfigurationOption>>();
 	private Map<ConfigurationOption,LElement> configuration_method = new HashMap<ConfigurationOption,LElement>();
 	private Map<ConfigurationOption,Set<ASTNode>>external_enable_cong_control = new HashMap<ConfigurationOption,Set<ASTNode>>();
@@ -57,7 +55,6 @@ public class Module implements Serializable {
 	private Variability variability;
 	private boolean isInternalVariabilityComputed = false;
 	private boolean isExternalVariabilityComputed = false;
-	private ConfigurationOptionTree tree;
 	private IProject aProject;
 	
 	
@@ -67,7 +64,7 @@ public class Module implements Serializable {
 		this.lElementfactory = pElementFactory;
 		this.abuilder = mbuilder;
 		this.dominateASTNode = element.getASTNode();		
-		this.contflowbuilder = new InternalConfBuilder(this);
+		this.contflowbuilder = new ConfTractor(this);
 		this.model = pmodel;
 		this.aProject = mbuilder.gettargetProject();
 	}
@@ -75,31 +72,22 @@ public class Module implements Serializable {
 	/**
 	 * initialize this module
 	 */
-	public void variabilityinitialize(){
+	public void initialize_configuration(){
 		
-		
-		// resolve body
-		resolvebody();
+		initialize();
 		
 		// resolve variability
-		resolveInternalVariability();
+		findConfigurations();
 		
 		configurations =  getAllConfigurationOptions();
 		components.addAll(configurations);
 		
 	}
-	public void normailinitialize(){
+	public void initialize(){
 		// resolve body
 		resolvebody();
 	}
 	
-	
-	public void computeVariability() {
-		this.tree = new ConfigurationOptionTree(this);
-		// TODO Auto-generated method stub
-		variability = new Variability(this);
-		variability.Collect(this.tree);
-	}
 	
 	
 
@@ -111,20 +99,20 @@ public class Module implements Serializable {
 		return helper;
 	}
 	
-	private void resolveInternalVariability(){
+	/**
+	 * The internal variability will not jump to other module
+	 * and only resolve this this module
+	 */
+	private void findConfigurations(){
+		
+		// a full parse that get all configuration in the method
 		this.contflowbuilder.parse();
+		
+		// extract the information
 		this.method_configurations = this.contflowbuilder.getMethod_To_Configuration();
 		this.configuration_method = this.contflowbuilder.getConfiguration_To_Method();
 		isInternalVariabilityComputed = true;
 	}
-	
-	public void resolveExternalVariability(){
-		externalconfbuilder = new ExternalConfBuilder(this,lElementfactory);
-		externalconfbuilder.parse();
-		isExternalVariabilityComputed = true;
-	}
-	
-	
 	
 	public boolean isExternalVariabilityComputed(){
 		return isExternalVariabilityComputed;
@@ -347,13 +335,7 @@ public class Module implements Serializable {
 		return module_dependency;
 	}
 
-	public Variability getVariability() {
-		// TODO Auto-generated method stub
-		if(variability==null){
-			computeVariability();
-		}
-		return variability;
-	}
+	
 
 	public int getIndex() {
 		// TODO Auto-generated method stub

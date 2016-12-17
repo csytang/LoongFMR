@@ -107,27 +107,6 @@ public class ModuleBuilder {
 			e1.printStackTrace();
 		}
 		
-		if(withvarability){
-			 // Create and check cross module(external variability)
-			 WorkspaceJob externalcheckerjob=new WorkspaceJob("CheckVariabilityModule & Dependency"){
-				    @Override 
-				    public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
-				    	variabilityModules_buildDependency(monitor);
-				    	return Status.OK_STATUS;
-				    }
-			};
-			
-			externalcheckerjob.setRule(root);
-			externalcheckerjob.setUser(true);
-			externalcheckerjob.setPriority(Job.INTERACTIVE);
-			externalcheckerjob.schedule();
-			try {
-				externalcheckerjob.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
 		
 	}
 	
@@ -144,20 +123,7 @@ public class ModuleBuilder {
 		}else
 			return null;
 	}
-	public void variabilityModules_buildDependency(IProgressMonitor pProgress){
-		if(pProgress != null){ 
-			int size = indexToModule.size();
-    		pProgress.beginTask("Extract External Variability", size);
-    	}
-
-		for(Map.Entry<Integer, Module>entry:indexToModule.entrySet()){
-			Module module = entry.getValue();
-			module.resolveExternalVariability();
-			
-			pProgress.worked(1);
-		}
-		pProgress.done();
-	}
+	
 	
 	public void buildModules(IProgressMonitor pProgress,boolean withvariability){
 		assert pProgress != null;
@@ -201,9 +167,9 @@ public class ModuleBuilder {
 		//	System.out.println("Process\t"+subcount+ " element:"+entry.getValue().getModuleName());
 			Module module = entry.getValue();
 			if(withvariability)
-				module.variabilityinitialize();
+				module.initialize_configuration();
 			else
-				module.normailinitialize();
+				module.initialize();
 			//module.initialize();
 			pProgress.worked(1);
 			System.out.println("processing module:"+subcount);
@@ -224,122 +190,7 @@ public class ModuleBuilder {
 			return null;
 	}
 	
-	protected void computeVariabilityLevel(){
-		for(Module module:amodel.getModules()){
-			for(ConfigurationOption config:module.getAllConfigurationOptions()){
-				config.computeVariability();
-			}
-		}
-		
-	}
 	
-	/**
-	 * this function will compute the over all variability level that 
-	 * represent the degree that a configuration can decide the program execution.
-	 */
-	protected void computeOverallVariabilityLevel(){
-		// 获得所有configuration option
-		Set<ConfigurationOption>allconfigurationOptions = new HashSet<ConfigurationOption>();
-		for(Module module:allmodules){
-			allconfigurationOptions.addAll(module.getAllConfigurationOptions());
-		}
-		
-		// 做第二件事 將所有的configuration option都拷貝到一個 list中
-		while(!allconfigurationOptions.isEmpty()){
-			Set<ConfigurationOption>needToRemove = new HashSet<ConfigurationOption>();
-			for(ConfigurationOption option:allconfigurationOptions){
-				if(option.getlinks().size()==0){
-					option.setOverallVariabilityCount(1);
-					needToRemove.add(option);
-				}else{
-					Set<ConfigurationRelationLink> links = option.getlinks();
-					Set<ConfigurationOption>alreadyset = new HashSet<ConfigurationOption>();
-					boolean canset = true;
-					int value = 0;
-					for(ConfigurationRelationLink link:links){
-						ConfigurationOption target = link.getTargetConfigurationOption();
-						if(target.isOverallVariabilitySet()){
-							if(!alreadyset.contains(target)){
-								value+=target.getOverallVariability();
-								alreadyset.add(target);
-							}
-						}else if(target.equals(option)){
-							if(!alreadyset.contains(target)){
-								alreadyset.add(target);
-							}
-						}else{
-							canset = false;
-							break;
-						}
-					}
-					alreadyset.clear();
-					if(canset){
-						option.setOverallVariabilityCount(value);
-						needToRemove.add(option);
-					}
-				}
-			}
-			if(!needToRemove.isEmpty()){
-				allconfigurationOptions.removeAll(needToRemove);
-			}else{
-				// 这里出现死锁 单独处理
-				break;
-			}
-		}
-		while(!allconfigurationOptions.isEmpty()){
-			Set<ConfigurationOption>needToRemove = new HashSet<ConfigurationOption>();
-			for(ConfigurationOption option:allconfigurationOptions){
-				Set<ConfigurationRelationLink> links = option.getlinks();
-				Set<ConfigurationOption>alreadyset = new HashSet<ConfigurationOption>();
-				boolean canset = true;
-				int value = 0;
-				for(ConfigurationRelationLink link:links){
-					ConfigurationOption target = link.getTargetConfigurationOption();
-					if(target.isOverallVariabilitySet()){
-						if(!alreadyset.contains(target)){
-							value+=target.getOverallVariability();
-							alreadyset.add(target);
-						}
-					}else if(target.equals(option)){
-						if(!alreadyset.contains(target)){
-							alreadyset.add(target);
-						}
-					}else if(allconfigurationOptions.contains(target)){
-						if(!alreadyset.contains(target)){
-							alreadyset.add(target);
-						}
-					}else{
-						canset = false;
-						break;
-					}
-				}
-				alreadyset.clear();
-				if(canset){
-					option.setOverallVariabilityCount(value);
-					needToRemove.add(option);
-				}
-				
-			}
-			if(!needToRemove.isEmpty()){
-				allconfigurationOptions.removeAll(needToRemove);
-			}else{
-				try {
-					throw new Exception("new error in processing overall variability");
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-	
-	public void computeStatistic() {
-		// TODO Auto-generated method stub
-		
-		computeVariabilityLevel();
-		
-		computeOverallVariabilityLevel();
-	}
 	public Map<Integer, Module> getIndexToModule() {
 		// TODO Auto-generated method stub
 		return indexToModule;

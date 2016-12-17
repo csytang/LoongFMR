@@ -96,7 +96,7 @@ public class ModuleLabelProvider implements ITableLabelProvider{
 					}
 				}else if(element instanceof ConfigurationRelationLink){
 					ConfigurationRelationLink confg_relation = (ConfigurationRelationLink)element;
-					String configurationexpstr = confg_relation.getTargetConfigurationOption().getExpression().toString();
+					String configurationexpstr = confg_relation.getTargetConfigurationOption().getConfigurationCondition().toString();
 					return configurationexpstr;
 				}
 			}
@@ -107,7 +107,7 @@ public class ModuleLabelProvider implements ITableLabelProvider{
 					ModuleComponent module_component = (ModuleComponent)element;
 					if(module_component instanceof ConfigurationOption){
 						ConfigurationOption configuration_module_component = (ConfigurationOption)module_component;
-						return configuration_module_component.getAffectedASTNodesRange();
+						return "";
 					}
 				}else if(element instanceof ConfigurationRelationLink){
 					ConfigurationRelationLink confg_relation = (ConfigurationRelationLink)element;
@@ -132,7 +132,7 @@ public class ModuleLabelProvider implements ITableLabelProvider{
 					ModuleComponent module_element = (ModuleComponent)element;
 					if(module_element instanceof ConfigurationOption){
 						ConfigurationOption configuration_module_component = (ConfigurationOption)module_element;
-						int internal = configuration_module_component.getInternalVariability();
+						int internal = 0;
 						return internal+"";
 					}
 				}else if(element instanceof ConfigurationRelationLink){					
@@ -146,7 +146,7 @@ public class ModuleLabelProvider implements ITableLabelProvider{
 					ModuleComponent module_element = (ModuleComponent)element;
 					if(module_element instanceof ConfigurationOption){
 						ConfigurationOption configuration_module_component = (ConfigurationOption)module_element;
-						int external = configuration_module_component.getExternalVariability();
+						int external = 0;
 						return external+"";
 					}
 				}else if(element instanceof ConfigurationRelationLink){
@@ -160,7 +160,7 @@ public class ModuleLabelProvider implements ITableLabelProvider{
 					ModuleComponent module_element = (ModuleComponent)element;
 					if(module_element instanceof ConfigurationOption){
 						ConfigurationOption configuration_module_component = (ConfigurationOption)module_element;
-						int overall = configuration_module_component.getOverallVariability();
+						int overall = 0;
 						return overall+"";
 					}
 				}else if(element instanceof ConfigurationRelationLink){

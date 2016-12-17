@@ -12,7 +12,7 @@ Require-Bundle: org.eclipse.ui.editors;bundle-version="3.8.200",
  org.eclipse.core.resources;bundle-version="3.9.1",
  org.eclipse.ui;bundle-version="3.106.1",
  org.eclipse.core.runtime;bundle-version="3.10.0",
- org.eclipse.gef;bundle-version="3.9.100",
+ org.eclipse.gef,
  org.eclipse.core.filesystem,
  LoongPlugin;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

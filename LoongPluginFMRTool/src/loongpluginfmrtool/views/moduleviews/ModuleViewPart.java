@@ -165,7 +165,7 @@ public class ModuleViewPart extends ViewPart {
 		        	if(moduleComponent instanceof ConfigurationOption){
 		        		ConfigurationOption option = (ConfigurationOption)moduleComponent;
 		        		Module module = option.getParent();
-		        		Expression expression = option.getExpression();
+		        		Expression expression = option.getConfigurationCondition().getFirstExpression();
 		        		IFile file = module.getIFile();
 		        		try {
 		        			IEditorPart editpart = IDE.openEditor(page, file, CLREditor.ID);
@@ -181,7 +181,7 @@ public class ModuleViewPart extends ViewPart {
 		        	
 	        		ConfigurationOption target_option = link.getTargetConfigurationOption();
 	        		Module target_module = target_option.getParent();
-	        		Expression target_expression = target_option.getExpression();
+	        		Expression target_expression = target_option.getConfigurationCondition().getFirstExpression();
 	        		IFile target_file = target_module.getIFile();
 	        		try {
 	        			IEditorPart editpart = IDE.openEditor(page, target_file, CLREditor.ID);

@@ -60,7 +60,6 @@ public class RecoveryFeatureModelVMS implements IObjectActionDelegate {
 		}else{
 			mbuilder = ModuleBuilder.getInstance(aProject, lDB);
 			mbuilder.init(true);
-			mbuilder.computeStatistic();
 			mbuilder.notifyModuleListener();
 			mbuilder.buildModuleHelper();
 			VMSConfigurationDialog dialog = new VMSConfigurationDialog(mbuilder,shell);

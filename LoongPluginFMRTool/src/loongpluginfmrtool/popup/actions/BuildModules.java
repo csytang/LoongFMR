@@ -45,7 +45,7 @@ public class BuildModules implements IObjectActionDelegate{
 			
 			mbuilder = ModuleBuilder.getInstance(aProject, lDB);
 			mbuilder.init(true);
-			mbuilder.computeStatistic();
+			
 			mbuilder.notifyModuleListener(); 
 		}
 		else{
