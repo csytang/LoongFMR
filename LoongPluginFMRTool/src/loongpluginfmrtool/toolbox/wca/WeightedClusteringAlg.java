@@ -30,7 +30,6 @@ import loongplugin.source.database.ProgramDatabase;
 import loongplugin.source.database.model.LElement;
 import loongplugin.source.database.model.LRelation;
 import loongplugin.utils.ASTCreator;
-import loongpluginfmrtool.module.builder.ModuleBuilder;
 import edu.usc.softarch.arcade.clustering.ClusterGainStoppingCriterion;
 import edu.usc.softarch.arcade.clustering.ConcernClusteringRunner;
 import edu.usc.softarch.arcade.clustering.FastCluster;
@@ -46,6 +45,7 @@ import edu.usc.softarch.arcade.config.Config.StoppingCriterionConfig;
 import edu.usc.softarch.arcade.functiongraph.TypedEdgeGraph;
 import edu.usc.softarch.arcade.topics.TopicModelExtractionMethod;
 import edu.usc.softarch.arcade.util.StopWatch;
+import loongpluginfmrtool.module.model.module.ModuleBuilder;
 import loongpluginfmrtool.util.ClusteringResultRSFOutput;
 
 import java.io.File;

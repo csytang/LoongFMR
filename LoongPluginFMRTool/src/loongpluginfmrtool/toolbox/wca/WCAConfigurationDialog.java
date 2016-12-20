@@ -12,7 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import loongplugin.source.database.ApplicationObserver;
-import loongpluginfmrtool.module.builder.ModuleBuilder;
+import loongpluginfmrtool.module.model.module.ModuleBuilder;
 import edu.usc.softarch.arcade.config.Config;
 import edu.usc.softarch.arcade.config.Config.SimMeasure;
 import edu.usc.softarch.arcade.config.Config.StoppingCriterionConfig;

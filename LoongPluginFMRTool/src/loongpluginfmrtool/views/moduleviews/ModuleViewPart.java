@@ -8,11 +8,11 @@ import loongplugin.LoongPlugin;
 import loongplugin.editor.CLREditor;
 import loongplugin.source.database.ApplicationObserver;
 import loongplugin.views.astview.EditorUtility;
-import loongpluginfmrtool.module.builder.ModuleBuilder;
-import loongpluginfmrtool.module.model.ConfigurationOption;
-import loongpluginfmrtool.module.model.ConfigurationRelationLink;
-import loongpluginfmrtool.module.model.Module;
-import loongpluginfmrtool.module.model.ModuleComponent;
+import loongpluginfmrtool.module.model.configuration.ConfigurationOption;
+import loongpluginfmrtool.module.model.configuration.ConfigurationRelationLink;
+import loongpluginfmrtool.module.model.module.Module;
+import loongpluginfmrtool.module.model.module.ModuleBuilder;
+import loongpluginfmrtool.module.model.module.ModuleComponent;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;

@@ -2,8 +2,8 @@ package loongpluginfmrtool.module.featuremodelbuilder;
 
 import java.util.Map;
 
-import loongpluginfmrtool.module.builder.ModuleBuilder;
-import loongpluginfmrtool.module.model.Module;
+import loongpluginfmrtool.module.model.module.Module;
+import loongpluginfmrtool.module.model.module.ModuleBuilder;
 
 public class InformationLossTable {
 	private ModuleBuilder abuilder;

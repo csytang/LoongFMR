@@ -1,4 +1,4 @@
-package loongpluginfmrtool.module.model;
+package loongpluginfmrtool.module.model.configuration;
 
 public class ConfigurationRelationLink {
 	private ConfigurationOption asource;

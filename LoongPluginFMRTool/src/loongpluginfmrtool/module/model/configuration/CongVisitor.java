@@ -1,4 +1,4 @@
-package loongpluginfmrtool.module.builder;
+package loongpluginfmrtool.module.model.configuration;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import loongpluginfmrtool.module.model.ConfigurationOption;
-import loongpluginfmrtool.module.model.Module;
+import loongpluginfmrtool.module.model.module.Module;
 import loongpluginfmrtool.util.ASTNodeHelper;
 import loongpluginfmrtool.util.ASTVisitorHelper;
 
@@ -28,10 +27,14 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
+import loongplugin.source.database.model.LElement;
 import loongplugin.source.database.model.LFlyweightElementFactory;
 
 public class CongVisitor extends ASTVisitor{
-
+	
+	/**
+	 * Configuration Visitor inherit from ASTVisitor
+	 */
 	private Set<ConfigurationOption> configurationOptions = new HashSet<ConfigurationOption>();
 	
 	private Module associatemdule;
@@ -51,10 +54,10 @@ public class CongVisitor extends ASTVisitor{
 		Expression condition = if_node.getExpression();
 		Statement then_statement = if_node.getThenStatement();
 		Statement else_statement = if_node.getElseStatement();
-		Set<ASTNode> astnodes = ConfigurationEntryFinder.getConfigurations(if_node,aLElementFactory);
-		for(ASTNode astnode:astnodes){
+		Set<LElement> elements = ConfigurationEntryFinder.getConfigurations(if_node,aLElementFactory);
+		for(LElement element:elements){
 			
-			ConfigurationOption option = createConfigurationOption(astnode,condition,associatemdule,methoddecl);
+			ConfigurationOption option = createConfigurationOption(element,condition,associatemdule,methoddecl);
 			assert option!=null;
 			if(then_statement!=null){
 				//configurationOptions.add(option);
@@ -86,9 +89,9 @@ public class CongVisitor extends ASTVisitor{
     	WhileStatement while_statement = (WhileStatement)node;
     	Expression condition = while_statement.getExpression();
     	Statement body = while_statement.getBody();
-    	Set<ASTNode> astnodes = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
-		for(ASTNode astnode:astnodes){
-			ConfigurationOption option = createConfigurationOption(astnode,condition,associatemdule,methoddecl);
+    	Set<LElement> elements = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
+		for(LElement element:elements){
+			ConfigurationOption option = createConfigurationOption(element,condition,associatemdule,methoddecl);
 			if(body!=null){
 	    		//configurationOptions.add(option);
 	    		option.addEnable_Statements(condition,body);
@@ -103,9 +106,9 @@ public class CongVisitor extends ASTVisitor{
     	DoStatement do_statement = (DoStatement) node;
     	Expression condition = do_statement.getExpression();
     	Statement body = do_statement.getBody();
-    	Set<ASTNode> astnodes = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
-		for(ASTNode astnode:astnodes){
-	    	ConfigurationOption option = createConfigurationOption(astnode,condition,associatemdule,methoddecl);
+    	Set<LElement> elements = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
+		for(LElement element:elements){
+	    	ConfigurationOption option = createConfigurationOption(element,condition,associatemdule,methoddecl);
 	    	if(body!=null){
 	    		//configurationOptions.add(option);
 	    		option.addEnable_Statements(condition,body);
@@ -119,9 +122,9 @@ public class CongVisitor extends ASTVisitor{
 		EnhancedForStatement enhance_statement = (EnhancedForStatement)node;
 		Expression condition = enhance_statement.getExpression();
 		Statement body = enhance_statement.getBody();
-		Set<ASTNode> astnodes = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
-		for(ASTNode astnode:astnodes){
-	    	ConfigurationOption option = createConfigurationOption(astnode,condition,associatemdule,methoddecl);
+		Set<LElement> elements = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
+		for(LElement element:elements){
+	    	ConfigurationOption option = createConfigurationOption(element,condition,associatemdule,methoddecl);
 			if(body!=null){
 				//configurationOptions.add(option);
 	    		option.addEnable_Statements(condition,body);
@@ -135,9 +138,9 @@ public class CongVisitor extends ASTVisitor{
 		ForStatement for_statement  = (ForStatement)node;
 		Expression condition = for_statement.getExpression();
 		Statement body = for_statement.getBody();
-		Set<ASTNode> astnodes = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
-		for(ASTNode astnode:astnodes){
-	    	ConfigurationOption option = createConfigurationOption(astnode,condition,associatemdule,methoddecl);
+		Set<LElement> elements = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
+		for(LElement element:elements){
+	    	ConfigurationOption option = createConfigurationOption(element,condition,associatemdule,methoddecl);
 			if(body!=null){
 				//configurationOptions.add(option);
 	    		option.addEnable_Statements(condition,body);
@@ -151,9 +154,9 @@ public class CongVisitor extends ASTVisitor{
 	public boolean visit(SwitchStatement node) {
 		SwitchStatement switch_node = (SwitchStatement)node;
 		Expression condition = switch_node.getExpression();
-		Set<ASTNode> astnodes = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
-		for(ASTNode astnode:astnodes){
-	    	ConfigurationOption option = createConfigurationOption(astnode,condition,associatemdule,methoddecl);
+		Set<LElement> elements = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
+		for(LElement element:elements){
+	    	ConfigurationOption option = createConfigurationOption(element,condition,associatemdule,methoddecl);
 	    	List<Statement> sub_statements = switch_node.statements();
 	    	if(sub_statements!=null){
 	    		if(!sub_statements.isEmpty()){
@@ -171,14 +174,15 @@ public class CongVisitor extends ASTVisitor{
 	}
 
 	
-	public ConfigurationOption createConfigurationOption(ASTNode node,Expression condition,Module associatemdule,MethodDeclaration methoddecl){
+	public ConfigurationOption createConfigurationOption(LElement element,Expression condition,Module associatemdule,MethodDeclaration methoddecl){
 		ConfigurationOption option = null;
+		ASTNode node = element.getASTNode();
 		if(node instanceof VariableDeclaration){
 			VariableDeclaration variable = (VariableDeclaration)node;
 			if(configuration_map_ASTNodesOption.containsKey(node)){
 				return configuration_map_ASTNodesOption.get(node);
 			}else{
-				option = new ConfigurationOption(variable,condition,associatemdule,methoddecl);
+				option = new ConfigurationOption(variable,element,condition,associatemdule,methoddecl);
 				configuration_map_ASTNodesOption.put(node, option);
 				configurationOptions.add(option);
 			}
@@ -187,7 +191,7 @@ public class CongVisitor extends ASTVisitor{
 			if(configuration_map_ASTNodesOption.containsKey(node)){
 				return configuration_map_ASTNodesOption.get(node);
 			}else{
-				option = new ConfigurationOption(field,condition,associatemdule,methoddecl);
+				option = new ConfigurationOption(field,element,condition,associatemdule,methoddecl);
 				configuration_map_ASTNodesOption.put(node, option);
 				configurationOptions.add(option);
 			}
@@ -196,7 +200,7 @@ public class CongVisitor extends ASTVisitor{
 			if(configuration_map_ASTNodesOption.containsKey(node)){
 				return configuration_map_ASTNodesOption.get(node);
 			}else{
-				option = new ConfigurationOption(enumdecl,condition,associatemdule,methoddecl);
+				option = new ConfigurationOption(enumdecl,element,condition,associatemdule,methoddecl);
 				configuration_map_ASTNodesOption.put(node, option);
 				configurationOptions.add(option);
 			}
@@ -205,7 +209,7 @@ public class CongVisitor extends ASTVisitor{
 			if(configuration_map_ASTNodesOption.containsKey(node)){
 				return configuration_map_ASTNodesOption.get(node);
 			}else{
-				option = new ConfigurationOption(methdecl,condition,associatemdule);
+				option = new ConfigurationOption(methdecl,element,condition,associatemdule);
 				configuration_map_ASTNodesOption.put(node, option);
 				configurationOptions.add(option);
 			}
@@ -214,7 +218,7 @@ public class CongVisitor extends ASTVisitor{
 			if(configuration_map_ASTNodesOption.containsKey(node)){
 				return configuration_map_ASTNodesOption.get(node);
 			}else{
-				option = new ConfigurationOption(typedecl,condition,associatemdule,methoddecl);
+				option = new ConfigurationOption(typedecl,element,condition,associatemdule,methoddecl);
 				configuration_map_ASTNodesOption.put(node, option);
 				configurationOptions.add(option);
 			}

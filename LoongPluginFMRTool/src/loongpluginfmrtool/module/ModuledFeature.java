@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import loongpluginfmrtool.module.model.Module;
 import loongpluginfmrtool.module.model.Variability;
+import loongpluginfmrtool.module.model.module.Module;
 
 public class ModuledFeature {
 	private String featurename = "unknown";

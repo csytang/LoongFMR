@@ -3,7 +3,7 @@ package loongpluginfmrtool.popup.actions;
 import java.util.Iterator;
 
 import loongplugin.source.database.ApplicationObserver;
-import loongpluginfmrtool.module.builder.ModuleBuilder;
+import loongpluginfmrtool.module.model.module.ModuleBuilder;
 import loongpluginfmrtool.views.moduleviews.ModuleViewPart;
 import loongpluginfmrtool.views.moduleviews.ModuleViewPart.ModuleModelChangeListener;
 
@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
-public class BuildModules implements IObjectActionDelegate{
+public class BuildModulesAction implements IObjectActionDelegate{
 
 	private IProject aProject;
 	private IStructuredSelection aSelection;
@@ -30,7 +30,7 @@ public class BuildModules implements IObjectActionDelegate{
 	private ModuleBuilder mbuilder;
 	private ModuleModelChangeListener listener;
 	private ModuleViewPart viewpart;
-	public BuildModules() {
+	public BuildModulesAction() {
 		// TODO Auto-generated constructor stub
 	}
 

@@ -8,9 +8,9 @@ import java.util.Vector;
 
 import org.eclipse.core.resources.IProject;
 
-import loongpluginfmrtool.module.builder.ModuleBuilder;
 import loongpluginfmrtool.module.featuremodelbuilder.ModuleDependencyTable;
-import loongpluginfmrtool.module.model.Module;
+import loongpluginfmrtool.module.model.module.Module;
+import loongpluginfmrtool.module.model.module.ModuleBuilder;
 import loongpluginfmrtool.util.ClusteringResultRSFOutput;
 
 public class VariabilityModuleSystem {
@@ -33,7 +33,7 @@ public class VariabilityModuleSystem {
 		this.evoluation = pevoluation;
 		
 		//ClusteringResultRSFOutput output = new ClusteringResultRSFOutput(clusterres,"modulevariabilitysystem",builder.gettargetProject());
-		ClusteringResultRSFOutput.ModuledRSFOutput(clusterres,"vms",builder.gettargetProject());
+		ClusteringResultRSFOutput.ModuledRSFOutput(clusterres,"vms",builder.getsubjectProject());
 	}
 	
 	

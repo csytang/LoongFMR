@@ -3,7 +3,7 @@ package loongpluginfmrtool.popup.actions;
 import java.util.Iterator;
 
 import loongplugin.source.database.ApplicationObserver;
-import loongpluginfmrtool.module.builder.ModuleBuilder;
+import loongpluginfmrtool.module.model.module.ModuleBuilder;
 import loongpluginfmrtool.toolbox.arc.ARCConfigurationWizard;
 import loongpluginfmrtool.toolbox.arc.ArchRConcernAlg;
 import loongpluginfmrtool.views.moduleviews.ModuleViewPart.ModuleModelChangeListener;

@@ -1,6 +1,8 @@
-package loongpluginfmrtool.module.model;
+package loongpluginfmrtool.module.model.configuration;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+
+import loongplugin.source.database.model.LElement;
 /*
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -10,10 +12,10 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 */
 public class ConfigurationEntry {
 	
-	private ASTNode entry;
+	private LElement entryelement;
 	private ConfigurationOption aoption;
-	public ConfigurationEntry(ConfigurationOption option,ASTNode node){
-		entry = node;
+	public ConfigurationEntry(ConfigurationOption option,LElement element){
+		entryelement = element;
 		aoption = option;
 	}
 	
@@ -23,15 +25,15 @@ public class ConfigurationEntry {
 		// TODO Auto-generated method stub
 		if(obj instanceof ConfigurationEntry){
 			ConfigurationEntry obj_entry = (ConfigurationEntry)obj;
-			return this.entry.equals(obj_entry.getASTNode());
+			return this.entryelement.equals(obj_entry.getLElement());
 		}else
 			return false;
 	}
 
 
-	private ASTNode getASTNode() {
+	public LElement getLElement() {
 		// TODO Auto-generated method stub
-		return entry;
+		return entryelement;
 	}
 	
 	

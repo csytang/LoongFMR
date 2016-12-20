@@ -1,10 +1,10 @@
 package loongpluginfmrtool.views.moduleviews;
 
 import loongplugin.LoongImages;
-import loongpluginfmrtool.module.model.ConfigurationOption;
-import loongpluginfmrtool.module.model.ConfigurationRelationLink;
-import loongpluginfmrtool.module.model.Module;
-import loongpluginfmrtool.module.model.ModuleComponent;
+import loongpluginfmrtool.module.model.configuration.ConfigurationOption;
+import loongpluginfmrtool.module.model.configuration.ConfigurationRelationLink;
+import loongpluginfmrtool.module.model.module.Module;
+import loongpluginfmrtool.module.model.module.ModuleComponent;
 import loongpluginfmrtool.views.recommendedfeatureview.ASTNodeWrapper;
 import loongpluginfmrtool.views.recommendedfeatureview.IJavaElementWrapper;
 import loongpluginfmrtool.views.recommendedfeatureview.RSFeature;

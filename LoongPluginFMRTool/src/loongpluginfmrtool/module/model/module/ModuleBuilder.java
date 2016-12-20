@@ -1,4 +1,4 @@
-package loongpluginfmrtool.module.builder;
+package loongpluginfmrtool.module.model.module;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,9 +31,6 @@ import loongpluginfmrtool.module.featuremodelbuilder.InformationLossTable;
 import loongpluginfmrtool.module.featuremodelbuilder.KullbackLeiblerTable;
 import loongpluginfmrtool.module.featuremodelbuilder.ModuleDependencyTable;
 import loongpluginfmrtool.module.featuremodelbuilder.ModuleHelper;
-import loongpluginfmrtool.module.model.ConfigurationOption;
-import loongpluginfmrtool.module.model.ConfigurationRelationLink;
-import loongpluginfmrtool.module.model.Module;
 import loongpluginfmrtool.views.moduleviews.IModuleModelChangeListener;
 import loongpluginfmrtool.views.moduleviews.ModuleModel;
 import loongpluginfmrtool.views.moduleviews.ModuleViewPart;
@@ -100,13 +97,6 @@ public class ModuleBuilder {
 		 job.setPriority(Job.INTERACTIVE);
 		 job.schedule();
 		 
-		try {
-			job.join();
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
 		
 	}
 	
@@ -127,11 +117,13 @@ public class ModuleBuilder {
 	
 	public void buildModules(IProgressMonitor pProgress,boolean withvariability){
 		assert pProgress != null;
+		/**
+		 * build the basic compilationunit to module
+		 */
 		if(pProgress != null){ 
-    		pProgress.beginTask("Building basic modules & Internal Varability", this.pd.getAllElements().size());
+    		pProgress.beginTask("Building basic modules configuration", this.pd.getAllElements().size());
     	}
 		int module_index = 0;
-		System.out.println("total size:"+this.pd.getAllElements().size());
 		int subcount = 0;
 		for(LElement element:this.pd.getAllElements()){
 			pProgress.subTask("Process element:"+element.getCompilationUnitName());
@@ -157,13 +149,18 @@ public class ModuleBuilder {
 		}
 		
 		if(pProgress != null){ 
-    		pProgress.beginTask("Building basic modules & Internal Varability", indexToModule.size());
+    		pProgress.beginTask("Building basic modules & Internal Varability", indexToModule.size()*2);
     	}
 		subcount = 0;
+		
+		/**
+		 * extract variability configuration from all modules
+		 */
+		
 		System.out.println("total count:"+indexToModule.size());
 		for(Map.Entry<Integer, Module>entry:indexToModule.entrySet()){
 			subcount++;
-		//	pProgress.subTask("Initializing modules:"+entry.getValue().getModuleName());
+			pProgress.subTask("Initializing modules:"+entry.getValue().getModuleName());
 		//	System.out.println("Process\t"+subcount+ " element:"+entry.getValue().getModuleName());
 			Module module = entry.getValue();
 			if(withvariability)
@@ -172,8 +169,27 @@ public class ModuleBuilder {
 				module.initialize();
 			//module.initialize();
 			pProgress.worked(1);
-			System.out.println("processing module:"+subcount);
+			System.out.println("intialize module:"+subcount);
 		}
+		
+		
+		for(Map.Entry<Integer, Module>entry:indexToModule.entrySet()){
+			subcount++;
+			pProgress.subTask("Extracting presence condition:"+entry.getValue().getModuleName());
+			Module module = entry.getValue();
+			if(withvariability)
+				module.extractConstrains();
+			
+			pProgress.worked(1);
+			System.out.println("extracting presence condition"+subcount);
+		}
+		
+		
+		
+		
+		
+		
+		
 		System.out.println("Process done");
 		pProgress.done();
 		
@@ -226,7 +242,7 @@ public class ModuleBuilder {
 		}
 		return kullback_leibler_table;
 	}
-	public IProject gettargetProject() {
+	public IProject getsubjectProject() {
 		// TODO Auto-generated method stub
 		return targetProject;
 	}

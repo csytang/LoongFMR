@@ -10,9 +10,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-import loongpluginfmrtool.module.builder.ModuleBuilder;
 import loongpluginfmrtool.module.featuremodelbuilder.ModuleDependencyTable;
-import loongpluginfmrtool.module.model.Module;
+import loongpluginfmrtool.module.model.module.Module;
+import loongpluginfmrtool.module.model.module.ModuleBuilder;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.resources.IFile;

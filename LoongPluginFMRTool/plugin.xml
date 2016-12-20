@@ -78,7 +78,7 @@
                menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group1">
          </action>
          <action
-               class="loongpluginfmrtool.popup.actions.BuildModules"
+               class="loongpluginfmrtool.popup.actions.BuildModulesAction"
                icon="icons/macro.ico"
                id="LoongPluginFMRTool.modulebuilder"
                label="Build #ifdef modules"

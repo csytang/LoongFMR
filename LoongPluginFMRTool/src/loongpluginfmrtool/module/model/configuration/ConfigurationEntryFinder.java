@@ -1,4 +1,4 @@
-package loongpluginfmrtool.module.builder;
+package loongpluginfmrtool.module.model.configuration;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,14 +16,14 @@ import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 
+import loongplugin.source.database.model.LElement;
 import loongplugin.source.database.model.LFlyweightElementFactory;
-import loongpluginfmrtool.module.model.ConfigurationEntry;
 
 public class ConfigurationEntryFinder {
 	private static IBinding binding;
 	private static LFlyweightElementFactory aLElementFactory;
-	public static Set<ASTNode> getConfigurations(ASTNode statement,LFlyweightElementFactory pLElementFactory){
-		final Set<ASTNode>astnodes = new HashSet<ASTNode>();
+	public static Set<LElement> getConfigurations(ASTNode statement,LFlyweightElementFactory pLElementFactory){
+		final Set<LElement>configurations = new HashSet<LElement>();
 		aLElementFactory = pLElementFactory;
 		statement.accept(new ASTVisitor(){
 			/**
@@ -37,8 +37,8 @@ public class ConfigurationEntryFinder {
 					/*
 					 *  defined in system type like int number = 5;
 					 */
-					ASTNode variablefieldnode = aLElementFactory.getElement(binding).getASTNode();
-					astnodes.add(variablefieldnode);
+					LElement element = aLElementFactory.getElement(binding);
+					configurations.add(element);
 				}
 				return false;
 			}
@@ -48,8 +48,8 @@ public class ConfigurationEntryFinder {
 				// TODO Auto-generated method stub
 				ConfigurationEntryFinder.binding = node.resolveTypeBinding();
 				if(aLElementFactory.getElement(binding)!=null){// method defined in API
-					ASTNode isntancecreatenode = aLElementFactory.getElement(binding).getASTNode();
-					astnodes.add(isntancecreatenode);
+					LElement element = aLElementFactory.getElement(binding);
+					configurations.add(element);
 				}
 				return false;
 			}
@@ -59,8 +59,8 @@ public class ConfigurationEntryFinder {
 				// return an IMethodBinding
 				ConfigurationEntryFinder.binding = node.resolveConstructorBinding();
 				if(aLElementFactory.getElement(binding)!=null){// method defined in API
-					ASTNode isntancecreatenode = aLElementFactory.getElement(binding).getASTNode();
-					astnodes.add(isntancecreatenode);
+					LElement element = aLElementFactory.getElement(binding);
+					configurations.add(element);
 				}
 				return false;
 			}
@@ -70,24 +70,24 @@ public class ConfigurationEntryFinder {
 			@Override
 			public boolean visit(EnumConstantDeclaration node) {
 				ConfigurationEntryFinder.binding = node.resolveVariable();
-				ASTNode enumcreatenode = aLElementFactory.getElement(binding).getASTNode();
-				astnodes.add(enumcreatenode);
+				LElement element = aLElementFactory.getElement(binding);
+				configurations.add(element);
 				return false;
 			}
 
 			@Override
 			public boolean visit(EnumDeclaration node) {
 				ConfigurationEntryFinder.binding = node.resolveBinding();
-				ASTNode enumcreatenode = aLElementFactory.getElement(binding).getASTNode();
-				astnodes.add(enumcreatenode);
+				LElement element = aLElementFactory.getElement(binding);
+				configurations.add(element);
 				return false;
 			}
 
 			@Override
 			public boolean visit(MethodDeclaration node) {
 				ConfigurationEntryFinder.binding = node.resolveBinding();
-				ASTNode methodnode = aLElementFactory.getElement(binding).getASTNode();
-				astnodes.add(methodnode);
+				LElement element = aLElementFactory.getElement(binding);
+				configurations.add(element);
 				return false;
 			}
 
@@ -95,8 +95,8 @@ public class ConfigurationEntryFinder {
 			public boolean visit(MethodInvocation node) {
 				ConfigurationEntryFinder.binding = node.resolveMethodBinding();
 				if(aLElementFactory.getElement(binding)!=null){// method defined in API
-					ASTNode methodnode = aLElementFactory.getElement(binding).getASTNode();
-					astnodes.add(methodnode);
+					LElement element = aLElementFactory.getElement(binding);
+					configurations.add(element);
 				}
 				return false;
 			}
@@ -105,8 +105,8 @@ public class ConfigurationEntryFinder {
 			public boolean visit(MethodRef node) {
 				ConfigurationEntryFinder.binding = node.resolveBinding();
 				if(aLElementFactory.getElement(binding)!=null){// method defined in API
-					ASTNode methodnode = aLElementFactory.getElement(binding).getASTNode();
-					astnodes.add(methodnode);
+					LElement element = aLElementFactory.getElement(binding);
+					configurations.add(element);
 				}
 				return false;
 			}
@@ -116,6 +116,6 @@ public class ConfigurationEntryFinder {
 		
 		
 		
-		return astnodes;
+		return configurations;
 	}
 }

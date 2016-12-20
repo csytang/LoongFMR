@@ -1,4 +1,4 @@
-package loongpluginfmrtool.module.model;
+package loongpluginfmrtool.module.model.module;
 
 import java.util.Set;
 

@@ -10,6 +10,9 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 
+import loongpluginfmrtool.module.model.configuration.ConfigurationOption;
+import loongpluginfmrtool.module.model.module.Module;
+
 public class Variability {
 	/**
 	 * 算一个varability
@@ -21,7 +24,7 @@ public class Variability {
 	
 	public Variability(Module pmodule){
 		this.module = pmodule;
-		this.options = this.module.getAllConfigurationOptions();
+		
 	}
 	
 	

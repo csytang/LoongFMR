@@ -1,11 +1,11 @@
 package loongpluginfmrtool.views.moduleviews;
 
-import loongpluginfmrtool.module.model.ConfigurationRelationLink;
-import loongpluginfmrtool.module.model.Module;
-import loongpluginfmrtool.module.model.ModuleComponent;
-
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+
+import loongpluginfmrtool.module.model.configuration.ConfigurationRelationLink;
+import loongpluginfmrtool.module.model.module.Module;
+import loongpluginfmrtool.module.model.module.ModuleComponent;
 
 public class ModuleContentProvider implements ITreeContentProvider{
 

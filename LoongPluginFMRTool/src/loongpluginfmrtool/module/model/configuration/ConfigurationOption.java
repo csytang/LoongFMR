@@ -1,4 +1,4 @@
-package loongpluginfmrtool.module.model;
+package loongpluginfmrtool.module.model.configuration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +21,10 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
+import loongplugin.source.database.model.LElement;
 import loongplugin.source.database.model.LFlyweightElementFactory;
+import loongpluginfmrtool.module.model.module.Module;
+import loongpluginfmrtool.module.model.module.ModuleComponent;
 
 public class ConfigurationOption extends ModuleComponent{
 	
@@ -55,9 +58,9 @@ public class ConfigurationOption extends ModuleComponent{
 	 * @param passociatedmodule
 	 * @param pmethoddecl
 	 */
-	public ConfigurationOption(VariableDeclaration variable,Expression pconfigOption,Module passociatedmodule,MethodDeclaration pmethoddecl){
+	public ConfigurationOption(VariableDeclaration variable,LElement element,Expression pconfigOption,Module passociatedmodule,MethodDeclaration pmethoddecl){
 		super(passociatedmodule);
-		this.configentry = new ConfigurationEntry(this,variable);
+		this.configentry = new ConfigurationEntry(this,element);
 		this.configurationcondition= new ConfigurationCondition(this,pconfigOption);
 		this.associatedmodule = passociatedmodule;
 		this.confg_relationlik = new HashSet<ConfigurationRelationLink>();
@@ -72,9 +75,9 @@ public class ConfigurationOption extends ModuleComponent{
 	 * @param passociatedmodule
 	 * @param pmethoddecl
 	 */
-	public ConfigurationOption(FieldDeclaration field,Expression pconfigOption,Module passociatedmodule,MethodDeclaration pmethoddecl){
+	public ConfigurationOption(FieldDeclaration field,LElement element,Expression pconfigOption,Module passociatedmodule,MethodDeclaration pmethoddecl){
 		super(passociatedmodule);
-		this.configentry = new ConfigurationEntry(this,field);
+		this.configentry = new ConfigurationEntry(this,element);
 		this.configurationcondition= new ConfigurationCondition(this,pconfigOption);
 		this.associatedmodule = passociatedmodule;
 		this.confg_relationlik = new HashSet<ConfigurationRelationLink>();
@@ -89,9 +92,9 @@ public class ConfigurationOption extends ModuleComponent{
 	 * @param passociatedmodule
 	 * @param pmethoddecl
 	 */
-	public ConfigurationOption(EnumDeclaration enumvalue,Expression pconfigOption,Module passociatedmodule,MethodDeclaration pmethoddecl){
+	public ConfigurationOption(EnumDeclaration enumvalue,LElement element,Expression pconfigOption,Module passociatedmodule,MethodDeclaration pmethoddecl){
 		super(passociatedmodule);
-		this.configentry = new ConfigurationEntry(this,enumvalue);
+		this.configentry = new ConfigurationEntry(this,element);
 		this.configurationcondition= new ConfigurationCondition(this,pconfigOption);
 		this.associatedmodule = passociatedmodule;
 		this.confg_relationlik = new HashSet<ConfigurationRelationLink>();
@@ -106,9 +109,9 @@ public class ConfigurationOption extends ModuleComponent{
 	 * @param pconfigExpression
 	 * @param passociatedmodule
 	 */
-	public ConfigurationOption(MethodDeclaration method,Expression pconfigExpression,Module passociatedmodule){
+	public ConfigurationOption(MethodDeclaration method,LElement element,Expression pconfigExpression,Module passociatedmodule){
 		super(passociatedmodule);
-		this.configentry = new ConfigurationEntry(this,method);
+		this.configentry = new ConfigurationEntry(this,element);
 		this.configurationcondition= new ConfigurationCondition(this,pconfigExpression);
 		this.associatedmodule = passociatedmodule;
 		this.confg_relationlik = new HashSet<ConfigurationRelationLink>();
@@ -117,9 +120,9 @@ public class ConfigurationOption extends ModuleComponent{
 	}
 	
 	
-	public ConfigurationOption(TypeDeclaration typedecl,Expression pinstancecreation,Module passociatedmodule,MethodDeclaration pmethoddecl){
+	public ConfigurationOption(TypeDeclaration typedecl,LElement element,Expression pinstancecreation,Module passociatedmodule,MethodDeclaration pmethoddecl){
 		super(passociatedmodule);
-		this.configentry = new ConfigurationEntry(this,typedecl);
+		this.configentry = new ConfigurationEntry(this,element);
 		this.configurationcondition= new ConfigurationCondition(this,pinstancecreation);
 		this.associatedmodule = passociatedmodule;
 		this.confg_relationlik = new HashSet<ConfigurationRelationLink>();

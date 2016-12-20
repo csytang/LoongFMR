@@ -1,13 +1,11 @@
-package loongpluginfmrtool.module.model;
+package loongpluginfmrtool.module.model.module;
 import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -17,24 +15,20 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-
-import loongplugin.color.coloredfile.CLRAnnotatedSourceFile;
 import loongplugin.source.database.model.LElement;
 import loongplugin.source.database.model.LFlyweightElementFactory;
-import loongpluginfmrtool.module.builder.ConfTractor;
-import loongpluginfmrtool.module.builder.ModuleBuilder;
-import loongpluginfmrtool.module.builder.ModuleDependencyBuilder;
 import loongpluginfmrtool.module.featuremodelbuilder.ModuleHelper;
+import loongpluginfmrtool.module.model.configuration.ConfTractor;
+import loongpluginfmrtool.module.model.configuration.ConfigurationOption;
+import loongpluginfmrtool.module.model.constrains.LinkerAndConditionalConstrains;
 import loongpluginfmrtool.module.util.ASTNodeWalker;
-import loongpluginfmrtool.module.util.ASTSubBindingFinder;
 import loongpluginfmrtool.views.moduleviews.ModuleModel;
 
 public class Module implements Serializable {
+	
 	private LElement dominate;
 	private int moduleIndex=0;
 	private Set<LElement> allmethods = new HashSet<LElement>();
@@ -45,18 +39,17 @@ public class Module implements Serializable {
 	private ConfTractor contflowbuilder;
 	private Map<LElement,Set<ConfigurationOption>> method_configurations = new HashMap<LElement,Set<ConfigurationOption>>();
 	private Map<ConfigurationOption,LElement> configuration_method = new HashMap<ConfigurationOption,LElement>();
-	private Map<ConfigurationOption,Set<ASTNode>>external_enable_cong_control = new HashMap<ConfigurationOption,Set<ASTNode>>();
-	private Map<ConfigurationOption,Set<ASTNode>>external_disable_cong_control = new HashMap<ConfigurationOption,Set<ASTNode>>();
+	
 	private Set<ConfigurationOption> configurations;
 	private Map<Module,Integer> module_dependency = new HashMap<Module,Integer>();
 	
-	private ModuleModel model;
+	private ModuleModel model = null;
 	private ModuleHelper helper = null;
-	private Variability variability;
-	private boolean isInternalVariabilityComputed = false;
-	private boolean isExternalVariabilityComputed = false;
-	private IProject aProject;
+	private IProject aProject = null;
 	
+	
+	/************constrains***************/
+	private LinkerAndConditionalConstrains linkcondconstains = null;
 	
 	public Module(LElement element,int index,LFlyweightElementFactory pElementFactory,ModuleBuilder mbuilder,ModuleModel pmodel){
 		this.dominate = element;
@@ -66,7 +59,7 @@ public class Module implements Serializable {
 		this.dominateASTNode = element.getASTNode();		
 		this.contflowbuilder = new ConfTractor(this);
 		this.model = pmodel;
-		this.aProject = mbuilder.gettargetProject();
+		this.aProject = mbuilder.getsubjectProject();
 	}
 	
 	/**
@@ -83,12 +76,11 @@ public class Module implements Serializable {
 		components.addAll(configurations);
 		
 	}
+	
 	public void initialize(){
 		// resolve body
 		resolvebody();
 	}
-	
-	
 	
 
 	public void addModuleHelper(ModuleHelper phelper){
@@ -111,18 +103,8 @@ public class Module implements Serializable {
 		// extract the information
 		this.method_configurations = this.contflowbuilder.getMethod_To_Configuration();
 		this.configuration_method = this.contflowbuilder.getConfiguration_To_Method();
-		isInternalVariabilityComputed = true;
+		
 	}
-	
-	public boolean isExternalVariabilityComputed(){
-		return isExternalVariabilityComputed;
-	}
-	
-	public boolean isInternalVariabilityComputed(){
-		return isInternalVariabilityComputed;
-	}
-	
-	
 	
 	public Map<LElement,Set<ConfigurationOption>> getMethod_To_Configuration(){
 		return this.method_configurations;
@@ -136,6 +118,7 @@ public class Module implements Serializable {
 	public Set<LElement> getallMethods(){
 		return allmethods;
 	}
+	
 	private void resolvebody(){
 		// find the method body inside the class
 		if(dominateASTNode!=null){
@@ -146,18 +129,12 @@ public class Module implements Serializable {
 				if(binding==null){
 					// there should be an API call
 					return;
-					/*
-					try{
-						throw new Exception("Cannot find the binding for"+methoddecl.getName().toString());
-					}catch(Exception e){
-						e.printStackTrace();
-					}*/
 				}
 				LElement methodelement = lElementfactory.getElement(binding);
 				if(methodelement!=null)
 					allmethods.add(methodelement);
 			}
-			resolveDependency();
+			
 		}
 	}
 	
@@ -170,59 +147,7 @@ public class Module implements Serializable {
 		return lElementfactory;
 	}
 	
-	
-	public void addExternalEnableConfigurationControl(ConfigurationOption config,Set<ASTNode> undercontrolled){
-		if(this.external_enable_cong_control.containsKey(config)){
-			Set<ASTNode> allastnodes = this.external_enable_cong_control.get(config);
-			allastnodes.addAll(undercontrolled);
-			this.external_enable_cong_control.put(config, allastnodes);
-		}else
-			this.external_enable_cong_control.put(config, undercontrolled);
-	}
-	public void addExternalEnableConfigurationControl(ConfigurationOption config,ASTNode undercontrolled){
-		if(this.external_enable_cong_control.containsKey(config)){
-			Set<ASTNode> allastnodes = this.external_enable_cong_control.get(config);
-			allastnodes.add(undercontrolled);
-			this.external_enable_cong_control.put(config, allastnodes);
-		}else{
-			Set<ASTNode> allastnodes = new HashSet<ASTNode>();
-			allastnodes.add(undercontrolled);
-			this.external_enable_cong_control.put(config, allastnodes);
-		}
-	}
-	public void addExternalDisableConfigurationControl(ConfigurationOption config,Set<ASTNode> undercontrolled){
-		if(this.external_disable_cong_control.containsKey(config)){
-			Set<ASTNode> allastnodes = this.external_disable_cong_control.get(config);
-			allastnodes.addAll(undercontrolled);
-			this.external_disable_cong_control.put(config, allastnodes);
-		}else
-			this.external_disable_cong_control.put(config, undercontrolled);
-	}
-	public void addExternalDisableConfigurationControl(ConfigurationOption config,ASTNode undercontrolled){
-		if(this.external_disable_cong_control.containsKey(config)){
-			Set<ASTNode> allastnodes = this.external_disable_cong_control.get(config);
-			allastnodes.add(undercontrolled);
-			this.external_disable_cong_control.put(config, allastnodes);
-		}else{
-			Set<ASTNode> allastnodes = new HashSet<ASTNode>();
-			allastnodes.add(undercontrolled);
-			this.external_disable_cong_control.put(config, allastnodes);
-		}
-	}
-	
-	public Set<ASTNode> getExternalEnableConfigurationControl(ConfigurationOption config){
-		if(external_enable_cong_control.containsKey(config)){
-			return external_enable_cong_control.get(config);
-		}else
-			return new HashSet<ASTNode>();
-	}
-	
-	public Set<ASTNode> getExternalDisableConfigurationControl(ConfigurationOption config){
-		if(external_disable_cong_control.containsKey(config)){
-			return external_disable_cong_control.get(config);
-		}else
-			return new HashSet<ASTNode>();
-	}
+
 	
 	public Set<ConfigurationOption> getAllConfigurationOptions(){
 		if(configurations==null){
@@ -316,12 +241,6 @@ public class Module implements Serializable {
 		return file;
 	}
 
-	public void resolveDependency() {
-		// TODO Auto-generated method stub
-		ModuleDependencyBuilder dependencybuilder = new ModuleDependencyBuilder(this,lElementfactory);
-		dependencybuilder.parse();
-		this.module_dependency = dependencybuilder.getmoduleDependencyResult();
-	}
 	
 	public int getTotalDependency(Module other){
 		int total = 0;
@@ -334,7 +253,6 @@ public class Module implements Serializable {
 	public  Map<Module,Integer> getAllDependency(){
 		return module_dependency;
 	}
-
 	
 
 	public int getIndex() {
@@ -342,7 +260,30 @@ public class Module implements Serializable {
 		return moduleIndex;
 	}
 
+	/**
+	 * Extract the presence condition for this module
+	 * see paper:
+	 * Where do Configuration Constraints Stem From?
+		An Extraction Approach and an Empirical Study
+		http://ieeexplore.ieee.org/document/7065312/
+	 */
 	
-	
+	public void extractConstrains() {
+		// 1. linker constrains
+		// 3. conditional constrains
+		/**
+		 * @link LinkerConstrains;
+		 */
+		linkcondconstains = new LinkerAndConditionalConstrains(this,this.lElementfactory,this.method_configurations);
+		
+		// 2. type constrains
+		
+		
+		
+		
+		
+		
+	}
+
 	
 }

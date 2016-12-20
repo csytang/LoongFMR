@@ -15,7 +15,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 
-import loongpluginfmrtool.module.model.Module;
+import loongpluginfmrtool.module.model.module.Module;
 
 public class ClusteringResultRSFOutput {
 	private static IFile file;

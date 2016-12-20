@@ -39,7 +39,7 @@ import loongplugin.source.database.ApplicationObserver;
 import loongplugin.source.database.ProgramDatabase;
 import loongplugin.source.database.model.LElement;
 import loongplugin.source.database.model.LRelation;
-import loongpluginfmrtool.module.builder.ModuleBuilder;
+import loongpluginfmrtool.module.model.module.ModuleBuilder;
 import loongpluginfmrtool.util.ClusteringResultRSFOutput;
 
 

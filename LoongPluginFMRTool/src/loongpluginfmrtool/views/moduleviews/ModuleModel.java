@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import loongpluginfmrtool.module.model.*;
+import loongpluginfmrtool.module.model.module.Module;
 
 public class ModuleModel implements Serializable{
 

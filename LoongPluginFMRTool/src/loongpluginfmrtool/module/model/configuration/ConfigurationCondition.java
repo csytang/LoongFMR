@@ -1,4 +1,4 @@
-package loongpluginfmrtool.module.model;
+package loongpluginfmrtool.module.model.configuration;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -137,13 +137,22 @@ public class ConfigurationCondition {
 		assert confcond_select_statement.containsKey(condition);
 		return confcond_select_statement.get(condition);
 	}
+	
+	public Map<Expression,Set<Statement>> getAllEnableStatement() {
+		// TODO Auto-generated method stub
+		return confcond_select_statement;
+	}
+	
 	public Set<Statement> getDisabledStatement(Expression condition) {
 		// TODO Auto-generated method stub
 		assert confcond_unselect_statement.containsKey(condition);
 		return confcond_unselect_statement.get(condition);
 	}
 	
-	
+	public Map<Expression,Set<Statement>> getAllDisabledStatement() {
+		// TODO Auto-generated method stub
+		return confcond_unselect_statement;
+	}
 	
 
 }

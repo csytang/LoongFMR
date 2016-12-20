@@ -3,7 +3,7 @@ package loongpluginfmrtool.popup.actions;
 import java.util.Iterator;
 
 import loongplugin.source.database.ApplicationObserver;
-import loongpluginfmrtool.module.builder.ModuleBuilder;
+import loongpluginfmrtool.module.model.module.ModuleBuilder;
 import loongpluginfmrtool.toolbox.limbo.LIMBOConfigurationDialog;
 import loongpluginfmrtool.views.moduleviews.ModuleViewPart.ModuleModelChangeListener;
 

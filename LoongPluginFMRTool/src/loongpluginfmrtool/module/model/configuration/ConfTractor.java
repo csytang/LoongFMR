@@ -1,4 +1,4 @@
-package loongpluginfmrtool.module.builder;
+package loongpluginfmrtool.module.model.configuration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,11 +18,7 @@ import loongplugin.source.database.ApplicationObserver;
 import loongplugin.source.database.model.LElement;
 import loongplugin.source.database.model.LFlyweightElementFactory;
 import loongplugin.source.database.model.LRelation;
-import loongpluginfmrtool.module.model.ConfigRelation;
-import loongpluginfmrtool.module.model.ConfigurationCondition;
-import loongpluginfmrtool.module.model.ConfigurationEntry;
-import loongpluginfmrtool.module.model.ConfigurationOption;
-import loongpluginfmrtool.module.model.Module;
+import loongpluginfmrtool.module.model.module.Module;
 import loongpluginfmrtool.module.util.ASTNodeWalker;
 
 public class ConfTractor {
@@ -51,16 +47,10 @@ public class ConfTractor {
 		// 1. process to a collection of method
 		obtainMethodInside();
 		
-		// 2. build the control flow graph for each method
+		// 2. collect the configuration options in methods
 		processMethodCongBuilder();
-
 		
 	}
-	
-	
-	
-	
-	
 	
 	public Map<LElement,Set<ConfigurationOption>> getMethod_To_Configuration(){
 		return method_configurations;
@@ -95,16 +85,23 @@ public class ConfTractor {
 	}
 	
 	/**
-	 * create the control flow graph for all methods declared
+	 * get the configuration option in each method
 	 */
 	protected void processMethodCongBuilder(){
 		for(LElement method:this.method_elements){
 			MethodDeclaration methoddecl_astnode = (MethodDeclaration)method.getASTNode();
+			// obtain the configuration in the method
 			CongVisitor confvisitor = new CongVisitor(module,methoddecl_astnode,LElementFactory);
 			methoddecl_astnode.accept(confvisitor);
 			Set<ConfigurationOption> configurationoption_set = confvisitor.getConfigurationOptions();
-			if(!configurationoption_set.isEmpty())
+			if(!configurationoption_set.isEmpty()){
 				method_configurations.put(method, configurationoption_set);
+			}
+			for(ConfigurationOption option:configurationoption_set){
+				configuration_method.put(option, method);
+			}
 		}
 	}
+	
+	
 }

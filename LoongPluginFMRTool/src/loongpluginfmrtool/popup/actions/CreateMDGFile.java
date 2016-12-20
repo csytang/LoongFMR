@@ -11,9 +11,9 @@ import java.util.Map;
 import javax.swing.JFileChooser;
 
 import loongplugin.source.database.ApplicationObserver;
-import loongpluginfmrtool.module.builder.ModuleBuilder;
 import loongpluginfmrtool.module.featuremodelbuilder.ModuleDependencyTable;
-import loongpluginfmrtool.module.model.Module;
+import loongpluginfmrtool.module.model.module.Module;
+import loongpluginfmrtool.module.model.module.ModuleBuilder;
 import loongpluginfmrtool.util.MDGFileConfig;
 
 import org.eclipse.core.resources.IProject;
