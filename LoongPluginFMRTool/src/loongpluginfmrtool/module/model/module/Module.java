@@ -24,6 +24,7 @@ import loongpluginfmrtool.module.featuremodelbuilder.ModuleHelper;
 import loongpluginfmrtool.module.model.configuration.ConfTractor;
 import loongpluginfmrtool.module.model.configuration.ConfigurationOption;
 import loongpluginfmrtool.module.model.constrains.LinkerAndConditionalConstrains;
+import loongpluginfmrtool.module.model.constrains.TypeConstrains;
 import loongpluginfmrtool.module.util.ASTNodeWalker;
 import loongpluginfmrtool.views.moduleviews.ModuleModel;
 
@@ -39,17 +40,17 @@ public class Module implements Serializable {
 	private ConfTractor contflowbuilder;
 	private Map<LElement,Set<ConfigurationOption>> method_configurations = new HashMap<LElement,Set<ConfigurationOption>>();
 	private Map<ConfigurationOption,LElement> configuration_method = new HashMap<ConfigurationOption,LElement>();
-	
 	private Set<ConfigurationOption> configurations;
-	private Map<Module,Integer> module_dependency = new HashMap<Module,Integer>();
 	
 	private ModuleModel model = null;
 	private ModuleHelper helper = null;
 	private IProject aProject = null;
-	
+	private Map<Module,Integer> module_dependency = new HashMap<Module,Integer>();
 	
 	/************constrains***************/
 	private LinkerAndConditionalConstrains linkcondconstains = null;
+	private TypeConstrains typeconstrains = null;
+	
 	
 	public Module(LElement element,int index,LFlyweightElementFactory pElementFactory,ModuleBuilder mbuilder,ModuleModel pmodel){
 		this.dominate = element;
@@ -75,6 +76,7 @@ public class Module implements Serializable {
 		configurations =  getAllConfigurationOptions();
 		components.addAll(configurations);
 		
+		extractConstrains();
 	}
 	
 	public void initialize(){
@@ -104,6 +106,8 @@ public class Module implements Serializable {
 		this.method_configurations = this.contflowbuilder.getMethod_To_Configuration();
 		this.configuration_method = this.contflowbuilder.getConfiguration_To_Method();
 		
+		
+		
 	}
 	
 	public Map<LElement,Set<ConfigurationOption>> getMethod_To_Configuration(){
@@ -117,6 +121,18 @@ public class Module implements Serializable {
 	
 	public Set<LElement> getallMethods(){
 		return allmethods;
+	}
+	
+	public int getTotalDependency(Module other){
+		int total = 0;
+		if(this.module_dependency.containsKey(other)){
+			total = this.module_dependency.get(other);
+		}
+		return total;
+	}
+	
+	public  Map<Module,Integer> getAllDependency(){
+		return module_dependency;
 	}
 	
 	private void resolvebody(){
@@ -135,9 +151,20 @@ public class Module implements Serializable {
 					allmethods.add(methodelement);
 			}
 			
+			// obtain the dependency information by the way
+			resoveDependency();
 		}
 	}
 	
+	/**
+	 * obtain the dependency information for this class
+	 */
+	private void resoveDependency() {
+		ModuleDependencyBuilder dependencybuilder = new ModuleDependencyBuilder(this,lElementfactory);
+		dependencybuilder.parse();
+		this.module_dependency = dependencybuilder.getmoduleDependencyResult();
+	}
+
 	public LElement getDominateElement(){
 		return dominate;
 	}
@@ -241,19 +268,6 @@ public class Module implements Serializable {
 		return file;
 	}
 
-	
-	public int getTotalDependency(Module other){
-		int total = 0;
-		if(this.module_dependency.containsKey(other)){
-			total = this.module_dependency.get(other);
-		}
-		return total;
-	}
-	
-	public  Map<Module,Integer> getAllDependency(){
-		return module_dependency;
-	}
-	
 
 	public int getIndex() {
 		// TODO Auto-generated method stub
@@ -278,7 +292,7 @@ public class Module implements Serializable {
 		
 		// 2. type constrains
 		
-		
+		typeconstrains = new TypeConstrains(this,this.lElementfactory);
 		
 		
 		
