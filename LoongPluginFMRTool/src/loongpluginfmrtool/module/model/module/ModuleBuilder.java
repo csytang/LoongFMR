@@ -27,10 +27,7 @@ import loongplugin.source.database.ProgramDatabase;
 import loongplugin.source.database.model.LElement;
 import loongplugin.source.database.model.LFlyweightElementFactory;
 import loongplugin.source.database.model.LICategories;
-import loongpluginfmrtool.module.featuremodelbuilder.InformationLossTable;
-import loongpluginfmrtool.module.featuremodelbuilder.KullbackLeiblerTable;
 import loongpluginfmrtool.module.featuremodelbuilder.ModuleDependencyTable;
-import loongpluginfmrtool.module.featuremodelbuilder.ModuleHelper;
 import loongpluginfmrtool.views.moduleviews.IModuleModelChangeListener;
 import loongpluginfmrtool.views.moduleviews.ModuleModel;
 import loongpluginfmrtool.views.moduleviews.ModuleViewPart;
@@ -50,8 +47,6 @@ public class ModuleBuilder {
 	private ModuleModel amodel = new ModuleModel();
 	private Set<Module>allmodules = new HashSet<Module>();
 	private ModuleDependencyTable dependency_table;
-	private KullbackLeiblerTable kullback_leibler_table;
-	private InformationLossTable information_loss_table;
 	public static ModuleBuilder getInstance(IProject selectedProject,ApplicationObserver pDB){
 		if(ModuleBuilder.targetProject!=selectedProject || lDB != pDB){
 			instance = new ModuleBuilder(selectedProject,pDB);
@@ -211,21 +206,7 @@ public class ModuleBuilder {
 		// TODO Auto-generated method stub
 		return indexToModule;
 	}
-	public void buildModuleHelper() {
-		// TODO Auto-generated method stub
-		dependency_table = new ModuleDependencyTable(this);
-		dependency_table.buildTable();
-		kullback_leibler_table = new KullbackLeiblerTable(this);
-		kullback_leibler_table.buildTable();
-		// build the module helper for each module
-		for(Map.Entry<Integer, Module>entry:indexToModule.entrySet()){
-			Module module = entry.getValue();
-			ModuleHelper helper = new ModuleHelper(module,this);
-			module.addModuleHelper(helper);
-		}
-		information_loss_table = new InformationLossTable(this);
-		information_loss_table.buildTable();
-	}
+	
 	public ModuleDependencyTable getDependencyTable() {
 		// TODO Auto-generated method stub
 		if(dependency_table==null){
@@ -235,13 +216,7 @@ public class ModuleBuilder {
 		return dependency_table;
 	}
 	
-	public KullbackLeiblerTable getKullbackLeiblerTable(){
-		if(kullback_leibler_table==null){
-			kullback_leibler_table = new KullbackLeiblerTable(this);
-			kullback_leibler_table.buildTable();
-		}
-		return kullback_leibler_table;
-	}
+	
 	public IProject getsubjectProject() {
 		// TODO Auto-generated method stub
 		return targetProject;

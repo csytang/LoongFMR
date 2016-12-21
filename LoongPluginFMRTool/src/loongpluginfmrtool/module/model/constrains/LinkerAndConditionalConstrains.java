@@ -17,6 +17,7 @@ import loongpluginfmrtool.module.model.configuration.ConfigurationCondition;
 import loongpluginfmrtool.module.model.configuration.ConfigurationEntry;
 import loongpluginfmrtool.module.model.configuration.ConfigurationOption;
 import loongpluginfmrtool.module.model.module.Module;
+import loongpluginfmrtool.module.model.util.ASTVisitorLElementVisitor;
 
 public class LinkerAndConditionalConstrains {
 	private Module amodule;
@@ -40,6 +41,8 @@ public class LinkerAndConditionalConstrains {
 		this.AOB = ApplicationObserver.getInstance();
 		findConditionalLinkerConstrains(amodule,amethod_configuration);
 	}
+	
+	
 	public void findConditionalLinkerConstrains(Module module, Map<LElement, Set<ConfigurationOption>> method_configuration) {
 		/**
 		 * defines the def-use chain constrains in module,
@@ -74,18 +77,20 @@ public class LinkerAndConditionalConstrains {
 				for(Expression exp:confcond_select_statement.keySet()){
 					Set<Statement> enabledstatements = confcond_select_statement.get(exp);
 					for(Statement statement:enabledstatements){
-						LElement statement_element = this.alElementfactory.getElement(statement);
-						// all possible relation 
-						Set<LRelation> validTransponseRelations = LRelation.getAllRelations(statement_element.getCategory(), true, false);
-						validTransponseRelations.addAll(LRelation.getAllRelations(element.getCategory(), true, true));
-						
-						for(LRelation validrelation:validTransponseRelations){
-							Set<LElement> backwardElements = AOB.getRange(element,validrelation);
-							for (LElement backwardElement : backwardElements) {
-								addconstraints(enableconstrains,exp,backwardElement);
+						ASTVisitorLElementVisitor elementvisitor = new ASTVisitorLElementVisitor(this.alElementfactory);
+						statement.accept(elementvisitor);
+						for(LElement statement_element:elementvisitor.getAllLElements()){
+							// all possible relation 
+							Set<LRelation> validTransponseRelations = LRelation.getAllRelations(statement_element.getCategory(), true, false);
+							validTransponseRelations.addAll(LRelation.getAllRelations(element.getCategory(), true, true));
+							
+							for(LRelation validrelation:validTransponseRelations){
+								Set<LElement> backwardElements = AOB.getRange(element,validrelation);
+								for (LElement backwardElement : backwardElements) {
+									addconstraints(enableconstrains,exp,backwardElement);
+								}
 							}
 						}
-					
 					}
 				}
 				
@@ -93,26 +98,25 @@ public class LinkerAndConditionalConstrains {
 				for(Expression exp:confcond_unselect_statement.keySet()){
 					Set<Statement> disablestatements = confcond_unselect_statement.get(exp);
 					for(Statement statement:disablestatements){
-						LElement statement_element = this.alElementfactory.getElement(statement);
-						// all possible relation 
-						Set<LRelation> validTransponseRelations = LRelation.getAllRelations(statement_element.getCategory(), true, false);
-						validTransponseRelations.addAll(LRelation.getAllRelations(element.getCategory(), true, true));
-						
-						for(LRelation validrelation:validTransponseRelations){
-							Set<LElement> backwardElements = AOB.getRange(element,validrelation);
-							for (LElement backwardElement : backwardElements) {
-								addconstraints(unableconstrains,exp,backwardElement);
+						ASTVisitorLElementVisitor elementvisitor = new ASTVisitorLElementVisitor(this.alElementfactory);
+						statement.accept(elementvisitor);
+						for(LElement statement_element:elementvisitor.getAllLElements()){
+							// all possible relation 
+							Set<LRelation> validTransponseRelations = LRelation.getAllRelations(statement_element.getCategory(), true, false);
+							validTransponseRelations.addAll(LRelation.getAllRelations(element.getCategory(), true, true));
+							
+							for(LRelation validrelation:validTransponseRelations){
+								Set<LElement> backwardElements = AOB.getRange(element,validrelation);
+								for (LElement backwardElement : backwardElements) {
+									addconstraints(unableconstrains,exp,backwardElement);
+								}
 							}
 						}
 					
 					}
 				}
-				
-				
 			}
 		}
-		
-		
 	}
 	
 	protected void addconstraints(Map<Expression,Set<LElement>> constrains,Expression exp, LElement element){

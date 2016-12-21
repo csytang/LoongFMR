@@ -47,11 +47,13 @@ public class TypeConstrains {
 				TypeDeclaration typedecl = (TypeDeclaration)classastnode;
 				// get super class if any
 				Type superclasstype = typedecl.getSuperclassType();
-				ITypeBinding parenttypebinding = superclasstype.resolveBinding();
-				LElement parentelement = alElementfactory.getElement(parenttypebinding);
-				if(parentelement!=null){
-					// if it is  in the system
-					type_typeconstrains.add(parentelement);
+				if(superclasstype!=null){
+					ITypeBinding parenttypebinding = superclasstype.resolveBinding();
+					LElement parentelement = alElementfactory.getElement(parenttypebinding);
+					if(parentelement!=null){
+						// if it is  in the system
+						type_typeconstrains.add(parentelement);
+					}
 				}
 				// get interface if any
 				List<Type> superinterfaces = typedecl.superInterfaceTypes();
@@ -97,11 +99,15 @@ public class TypeConstrains {
 				TypeBindingVisitor typebindingvisitor = new TypeBindingVisitor();
 				methodastnode.accept(typebindingvisitor);
 				Set<ITypeBinding> typebindings = typebindingvisitor.getVariableBindings();
-				for(ITypeBinding binding:typebindings){
-					LElement typeelement = alElementfactory.getElement(binding);
-					if(typeelement!=null){
-						// if the interface is  in the system
-						type_typeconstrains.add(typeelement);
+				if(typebindings!=null){
+					for(ITypeBinding binding:typebindings){
+						if(binding!=null){
+							LElement typeelement = alElementfactory.getElement(binding);
+							if(typeelement!=null){
+								// if the interface is  in the system
+								type_typeconstrains.add(typeelement);
+							}
+						}
 					}
 				}
 			}

@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import loongplugin.source.database.model.LElement;
 import loongplugin.source.database.model.LFlyweightElementFactory;
-import loongpluginfmrtool.module.featuremodelbuilder.ModuleHelper;
 import loongpluginfmrtool.module.model.configuration.ConfTractor;
 import loongpluginfmrtool.module.model.configuration.ConfigurationOption;
 import loongpluginfmrtool.module.model.constrains.LinkerAndConditionalConstrains;
@@ -43,7 +42,6 @@ public class Module implements Serializable {
 	private Set<ConfigurationOption> configurations;
 	
 	private ModuleModel model = null;
-	private ModuleHelper helper = null;
 	private IProject aProject = null;
 	private Map<Module,Integer> module_dependency = new HashMap<Module,Integer>();
 	
@@ -85,13 +83,7 @@ public class Module implements Serializable {
 	}
 	
 
-	public void addModuleHelper(ModuleHelper phelper){
-		helper = phelper;
-	}
 	
-	public ModuleHelper getModuleHelper(){
-		return helper;
-	}
 	
 	/**
 	 * The internal variability will not jump to other module
