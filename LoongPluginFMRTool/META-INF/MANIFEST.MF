@@ -14,7 +14,9 @@ Require-Bundle: org.eclipse.ui.editors;bundle-version="3.8.200",
  org.eclipse.core.runtime;bundle-version="3.10.0",
  org.eclipse.gef,
  org.eclipse.core.filesystem,
- LoongPlugin;bundle-version="1.0.0"
+ LoongPlugin;bundle-version="1.0.0",
+ org.eclipse.zest.core;bundle-version="1.5.0",
+ org.eclipse.zest.layouts;bundle-version="1.1.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: xstream-1.4.2.jar,

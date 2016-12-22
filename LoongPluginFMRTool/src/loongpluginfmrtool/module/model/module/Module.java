@@ -82,9 +82,6 @@ public class Module implements Serializable {
 		resolvebody();
 	}
 	
-
-	
-	
 	/**
 	 * The internal variability will not jump to other module
 	 * and only resolve this this module
@@ -285,9 +282,6 @@ public class Module implements Serializable {
 		// 2. type constrains
 		
 		typeconstrains = new TypeConstrains(this,this.lElementfactory);
-		
-		
-		
 		
 	}
 

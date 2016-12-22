@@ -85,6 +85,13 @@
                menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group1">
          </action>
          <action
+               class="loongpluginfmrtool.popup.actions.BuildModuleDependencyAction"
+               icon="icons/moduledep.png"
+               id="LoongPluginFMRTool.moduledependencybuilder"
+               label="Build Module Dependency View"
+               menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group1">
+         </action>
+         <action
                class="loongpluginfmrtool.popup.actions.CreateMDGFile"
                icon="icons/mpgtoolbox.png"
                id="LoongPluginFMRTool.bunchtool"
@@ -202,6 +209,13 @@
             icon="icons/module.png"
             id="LoongPlugin.FMRTool.ModuleView"
             name="Modules with Configurations"
+            restorable="true">
+      </view>
+      <view
+            category="ModuleViewPart"
+            class="loongpluginfmrtool.views.moduledependencyviews.ModuleDependencyViewPart"
+            id="LoongPlugin.FMRTool.moduledependency"
+            name="Build Module Dependency View"
             restorable="true">
       </view>
    </extension>
