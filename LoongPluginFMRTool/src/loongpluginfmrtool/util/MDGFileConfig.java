@@ -10,9 +10,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-import loongpluginfmrtool.module.featuremodelbuilder.ModuleDependencyTable;
 import loongpluginfmrtool.module.model.module.Module;
 import loongpluginfmrtool.module.model.module.ModuleBuilder;
+import loongpluginfmrtool.module.model.module.ModuleCallDependencyTable;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.resources.IFile;
@@ -33,14 +33,14 @@ public class MDGFileConfig extends TitleAreaDialog {
 
 	private ModuleBuilder mbuilder;
 	private Map<Integer,Module> indexToModule = new HashMap<Integer,Module>();
-	private ModuleDependencyTable dependency_table;
+	private ModuleCallDependencyTable dependency_table;
 	private int[][] table;
 	private IProject aProject; 
 	/**
 	 * Create the dialog.
 	 * @param parentShell
 	 */
-	public MDGFileConfig(Shell parentShell,IProject pProject,ModuleBuilder pbuilder,Map<Integer,Module> pindexToModule,ModuleDependencyTable pdependency_table,
+	public MDGFileConfig(Shell parentShell,IProject pProject,ModuleBuilder pbuilder,Map<Integer,Module> pindexToModule,ModuleCallDependencyTable pdependency_table,
 			int[][] ptable) {
 		super(parentShell);
 		this.aProject = pProject;
@@ -112,7 +112,7 @@ public class MDGFileConfig extends TitleAreaDialog {
 	}
 	
 	
-	private void createMDGFile(ModuleDependencyTable dependency_table,String directory) throws FileNotFoundException, UnsupportedEncodingException {
+	private void createMDGFile(ModuleCallDependencyTable dependency_table,String directory) throws FileNotFoundException, UnsupportedEncodingException {
 		// TODO Auto-generated method stub
 		table = dependency_table.getTable();
 		int size = table.length;

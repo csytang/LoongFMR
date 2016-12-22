@@ -25,7 +25,6 @@ import loongplugin.source.database.ProgramDatabase;
 import loongplugin.source.database.model.LElement;
 import loongplugin.source.database.model.LFlyweightElementFactory;
 import loongplugin.source.database.model.LICategories;
-import loongpluginfmrtool.module.featuremodelbuilder.ModuleDependencyTable;
 import loongpluginfmrtool.views.moduleviews.IModuleModelChangeListener;
 import loongpluginfmrtool.views.moduleviews.ModuleModel;
 import loongpluginfmrtool.views.moduleviews.ModuleViewPart;
@@ -44,7 +43,7 @@ public class ModuleBuilder {
 	private List<IModuleModelChangeListener>listeners = new LinkedList<IModuleModelChangeListener>();
 	private ModuleModel amodel = new ModuleModel();
 	private Set<Module>allmodules = new HashSet<Module>();
-	private ModuleDependencyTable dependency_table;
+	private ModuleCallDependencyTable dependency_table;
 	public static ModuleBuilder getInstance(IProject selectedProject,ApplicationObserver pDB){
 		if(ModuleBuilder.targetProject!=selectedProject || lDB != pDB){
 			instance = new ModuleBuilder(selectedProject,pDB);
@@ -205,10 +204,10 @@ public class ModuleBuilder {
 		return indexToModule;
 	}
 	
-	public ModuleDependencyTable getDependencyTable() {
+	public ModuleCallDependencyTable getDependencyTable() {
 		// TODO Auto-generated method stub
 		if(dependency_table==null){
-			dependency_table = new ModuleDependencyTable(this);
+			dependency_table = new ModuleCallDependencyTable(this);
 			dependency_table.buildTable();
 		}
 		return dependency_table;

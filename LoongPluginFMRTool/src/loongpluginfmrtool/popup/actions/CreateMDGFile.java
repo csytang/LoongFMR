@@ -11,9 +11,9 @@ import java.util.Map;
 import javax.swing.JFileChooser;
 
 import loongplugin.source.database.ApplicationObserver;
-import loongpluginfmrtool.module.featuremodelbuilder.ModuleDependencyTable;
 import loongpluginfmrtool.module.model.module.Module;
 import loongpluginfmrtool.module.model.module.ModuleBuilder;
+import loongpluginfmrtool.module.model.module.ModuleCallDependencyTable;
 import loongpluginfmrtool.util.MDGFileConfig;
 
 import org.eclipse.core.resources.IProject;
@@ -44,7 +44,7 @@ public class CreateMDGFile implements IObjectActionDelegate{
 	private ApplicationObserver lDB;
 	private ModuleBuilder mbuilder;
 	private Map<Integer,Module> indexToModule = new HashMap<Integer,Module>();
-	private ModuleDependencyTable dependency_table;
+	private ModuleCallDependencyTable dependency_table;
 	private int[][] table;
 	
 	public CreateMDGFile() {

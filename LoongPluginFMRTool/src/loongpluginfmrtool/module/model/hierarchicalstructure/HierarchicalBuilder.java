@@ -68,7 +68,15 @@ public class HierarchicalBuilder {
 	 * @return
 	 */
 	private void exploreAllHierchicalRelations() {
-		
+		for(Map.Entry<Integer, Module>entry:this.indextoModules.entrySet()){
+			Module module = entry.getValue();
+			// get all call dependencies
+			Set<Module> dependencies = module.getAllCallDependency().keySet();
+			// 
+			if(dependencies.size()!=0){
+				
+			}
+		}
 		
 	}
 

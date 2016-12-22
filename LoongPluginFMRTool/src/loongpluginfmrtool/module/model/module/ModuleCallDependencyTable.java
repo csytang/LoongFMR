@@ -1,11 +1,8 @@
-package loongpluginfmrtool.module.featuremodelbuilder;
+package loongpluginfmrtool.module.model.module;
 
 import java.util.Map;
 
-import loongpluginfmrtool.module.model.module.Module;
-import loongpluginfmrtool.module.model.module.ModuleBuilder;
-
-public class ModuleDependencyTable {
+public class ModuleCallDependencyTable {
 	private ModuleBuilder builder;
 	private int totalsize;
 	private int[][] table;
@@ -13,7 +10,7 @@ public class ModuleDependencyTable {
 	private double[][] normalizedtable;
 	private Map<Integer,Module> indexToModule;
 	private boolean isNormalizedtableCompuated = false;
-	public ModuleDependencyTable(ModuleBuilder pbuilder){
+	public ModuleCallDependencyTable(ModuleBuilder pbuilder){
 		builder = pbuilder;
 	}
 	
@@ -34,6 +31,10 @@ public class ModuleDependencyTable {
 		if(debug){
 			printtable();
 		}
+	}
+	private int computeTotalReference(Module a,Module b){
+		int reference = a.getAllCallDependency().get(b);
+		return reference;
 	}
 	
 	public double[][] getNormalizedTable(){
@@ -70,10 +71,7 @@ public class ModuleDependencyTable {
 			System.out.println();
 		}
 	}
-	private int computeTotalReference(Module a,Module b){
-		int reference = a.getTotalDependency(b);
-		return reference;
-	}
+	
 	
 	private void safechecker(){
 		for(int i = 0;i < totalsize;i++){
@@ -92,11 +90,6 @@ public class ModuleDependencyTable {
 		return table;
 	}
 
-	public int getDependencyCount(Module modulei, Module modulej) {
-		// TODO Auto-generated method stub
-		int indexi  = modulei.getIndex();
-		int indexj = modulej.getIndex();
-		return table[indexi][indexj];
 	
-	}
+	
 }

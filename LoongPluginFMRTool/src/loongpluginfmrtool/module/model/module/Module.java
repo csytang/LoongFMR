@@ -43,7 +43,7 @@ public class Module implements Serializable {
 	
 	private ModuleModel model = null;
 	private IProject aProject = null;
-	private Map<Module,Integer> module_dependency = new HashMap<Module,Integer>();
+	private Map<Module,Integer> module_calldependency = new HashMap<Module,Integer>();
 	
 	/************constrains***************/
 	private LinkerAndConditionalConstrains linkcondconstains = null;
@@ -112,16 +112,9 @@ public class Module implements Serializable {
 		return allmethods;
 	}
 	
-	public int getTotalDependency(Module other){
-		int total = 0;
-		if(this.module_dependency.containsKey(other)){
-			total = this.module_dependency.get(other);
-		}
-		return total;
-	}
 	
-	public  Map<Module,Integer> getAllDependency(){
-		return module_dependency;
+	public  Map<Module,Integer> getAllCallDependency(){
+		return module_calldependency;
 	}
 	
 	private void resolvebody(){
@@ -149,9 +142,9 @@ public class Module implements Serializable {
 	 * obtain the dependency information for this class
 	 */
 	private void resoveDependency() {
-		ModuleDependencyBuilder dependencybuilder = new ModuleDependencyBuilder(this,lElementfactory);
+		ModuleCallDependencyBuilder dependencybuilder = new ModuleCallDependencyBuilder(this,lElementfactory);
 		dependencybuilder.parse();
-		this.module_dependency = dependencybuilder.getmoduleDependencyResult();
+		this.module_calldependency = dependencybuilder.getmoduleCallDependencyResult();
 	}
 
 	public LElement getDominateElement(){

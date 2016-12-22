@@ -8,16 +8,16 @@ import java.util.Vector;
 
 import org.eclipse.core.resources.IProject;
 
-import loongpluginfmrtool.module.featuremodelbuilder.ModuleDependencyTable;
 import loongpluginfmrtool.module.model.module.Module;
 import loongpluginfmrtool.module.model.module.ModuleBuilder;
+import loongpluginfmrtool.module.model.module.ModuleCallDependencyTable;
 import loongpluginfmrtool.util.ClusteringResultRSFOutput;
 
 public class VariabilityModuleSystem {
 	
 	private ModuleBuilder builder;
 	private Map<Integer, Module>indexToModule = new HashMap<Integer, Module>();
-	private ModuleDependencyTable dependency_table;
+	private ModuleCallDependencyTable dependency_table;
 	private int populationcount;
 	private int cluster;
 	

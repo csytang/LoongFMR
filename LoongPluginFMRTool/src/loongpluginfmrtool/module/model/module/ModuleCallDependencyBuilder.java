@@ -19,17 +19,17 @@ import loongplugin.source.database.model.LElement;
 import loongplugin.source.database.model.LFlyweightElementFactory;
 
 
-public class ModuleDependencyBuilder {
+public class ModuleCallDependencyBuilder {
 	
 	private Module module;
 	private LFlyweightElementFactory LElementFactory;
 	private List<LElement>allmethods = new LinkedList<LElement>();
 	private Map<Module,Integer> moduleDependency = new HashMap<Module,Integer>();
 	
-	public Map<Module,Integer> getmoduleDependencyResult(){
+	public Map<Module,Integer> getmoduleCallDependencyResult(){
 		return moduleDependency;
 	}
-	public ModuleDependencyBuilder(Module module,LFlyweightElementFactory pLElementFactory){
+	public ModuleCallDependencyBuilder(Module module,LFlyweightElementFactory pLElementFactory){
 		this.module = module;
 		this.LElementFactory = pLElementFactory;
 		this.allmethods = new LinkedList<LElement>(this.module.getallMethods()); 
@@ -59,29 +59,6 @@ public class ModuleDependencyBuilder {
 			
 		}
 		
-		
-		@Override
-		public boolean visit(ClassInstanceCreation node) {
-			// TODO Auto-generated method stub
-			Type instance_type = node.getType();
-			ITypeBinding typebinding = instance_type.resolveBinding();
-			if(typebinding!=null){
-				LElement declelement = LElementFactory.getElement(typebinding);
-				if(declelement!=null){
-					CompilationUnit compilation_unit = declelement.getCompilationUnit();
-					LElement compilation_unit_element = LElementFactory.getElement(compilation_unit);
-					IMethodBinding method_binding = node.resolveConstructorBinding();
-					if(method_binding!=null){
-						LElement method_element = LElementFactory.getElement(method_binding);
-						if(method_element!=null){
-							Module remote_module = ModuleBuilder.instance.getModuleByLElement(compilation_unit_element);
-							addDepenency(remote_module);
-						}
-					}
-				}
-			}
-			return super.visit(node);
-		}
 
 
 		@Override
