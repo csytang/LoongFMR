@@ -11,6 +11,7 @@ import loongpluginfmrtool.module.model.module.Module;
 public class HierarchicalNeighbor {
 	private Module asource;
 	private Map<ConfigurationCondition,Set<Module>> condition_targetmodule = new HashMap<ConfigurationCondition,Set<Module>>();
+	private Set<Module>fixedrequired = new HashSet<Module>();
 	
 	public HierarchicalNeighbor(Module psource){
 		this.asource = psource;
@@ -33,6 +34,14 @@ public class HierarchicalNeighbor {
 		}
 	}
 	
+	/**
+	 * add fix module to this module
+	 * @return
+	 */
+	public void addNeighbor(Module module){
+		fixedrequired.add(module);
+	}
+	
 	
 	public Set<Module> getAllNeighbors(){
 		 Set<Module> allneighbors = new HashSet<Module>();
@@ -40,6 +49,7 @@ public class HierarchicalNeighbor {
 			 Set<Module> targets = entry.getValue();
 			 allneighbors.addAll(targets);
 		 }
+		 allneighbors.addAll(fixedrequired);
 		 return allneighbors;
 	}
 }

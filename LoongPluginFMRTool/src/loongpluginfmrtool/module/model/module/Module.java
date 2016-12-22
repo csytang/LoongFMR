@@ -278,5 +278,22 @@ public class Module implements Serializable {
 		
 	}
 
+	/**
+	 * return the type constrains of this module
+	 * @return
+	 */
+	public TypeConstrains getTypeConstrains() {
+		
+		return typeconstrains;
+	}
+	
+	/**
+	 * return the linker and conditional constrain of this module
+	 * @return
+	 */
+	public LinkerAndConditionalConstrains getLinkerAndConditionalConstrains(){
+		return linkcondconstains;
+	}
+
 	
 }

@@ -2,7 +2,9 @@ package loongpluginfmrtool.views.moduledependencyviews;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
@@ -26,10 +28,10 @@ public class ModuleDependencyViewPart extends ViewPart implements IZoomableWorkb
 	private Composite aparent;
 	private HierarchicalBuilder builder=null;
 	private HierarchicalBuilderChangeListener listener = new HierarchicalBuilderChangeListener();
-	public ModuleDependencyViewPart() {
-		instance = this;
-	}
 	
+	public ModuleDependencyViewPart(){
+		super();
+	}
 	public static ModuleDependencyViewPart getInstance(){
 		if(instance==null)
 			instance = new ModuleDependencyViewPart();
@@ -39,6 +41,7 @@ public class ModuleDependencyViewPart extends ViewPart implements IZoomableWorkb
 	@Override
 	public void createPartControl(Composite parent) {
 		this.aparent = parent;
+		
 		graphViewer = new GraphViewer(parent, SWT.BORDER);
 		
 		// 查看Editor 如果 editor 没有 则查看选择按钮就
@@ -51,6 +54,7 @@ public class ModuleDependencyViewPart extends ViewPart implements IZoomableWorkb
 			graphViewer.setLabelProvider(new ModuleDependencyLabelProvider());
 			graphViewer.setContentProvider(new ModuleDependencyContentProvider(builder));
 		}
+		
 		fillToolBar();
 		
 	}
@@ -74,8 +78,10 @@ public class ModuleDependencyViewPart extends ViewPart implements IZoomableWorkb
 	}
 
 	
-	public void redraw(HierarchicalBuilder builder){
+	public void redraw(HierarchicalBuilder builder,Shell shell){
 		if(graphViewer==null){
+			if(aparent==null)
+				aparent = shell;
 			graphViewer = new GraphViewer(aparent, SWT.BORDER);
 			graphViewer.setLabelProvider(new ModuleDependencyLabelProvider());
 			graphViewer.setContentProvider(new ModuleDependencyContentProvider(builder));
@@ -85,7 +91,7 @@ public class ModuleDependencyViewPart extends ViewPart implements IZoomableWorkb
 			graphViewer.applyLayout();
 			graphViewer.setConnectionStyle(ZestStyles.CONNECTIONS_DIRECTED);
 			graphViewer.setInput(builder);
-		    fillToolBar();
+		    
 		   
 		}else{
 			graphViewer.setInput(builder);
@@ -103,11 +109,11 @@ public class ModuleDependencyViewPart extends ViewPart implements IZoomableWorkb
 	class HierarchicalBuilderChangeListener implements IHierarchicalBuilderChangeListener{
 
 		@Override
-		public void hierarchicalBuilderChanged(HierarchicalBuilderChangedEvent event) {
+		public void hierarchicalBuilderChanged(HierarchicalBuilderChangedEvent event,Shell shell) {
 			// TODO Auto-generated method stub
 			builder = event.getUpdatedBuilder();
-			redraw(builder);
-					
+			
+			ModuleDependencyViewPart.getInstance().redraw(builder,shell);
 		}
 		
 	}
@@ -117,16 +123,20 @@ public class ModuleDependencyViewPart extends ViewPart implements IZoomableWorkb
 		return listener;
 	}
 
-	public void setModuleBuilder(HierarchicalBuilder hbuilder) {
+	public void setModuleBuilder(HierarchicalBuilder hbuilder,Shell shell) {
 		// TODO Auto-generated method stub
 		this.builder = hbuilder;
+		
+		
 		try {
+			
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ModuleDependencyViewPart.ID);
 		} catch (PartInitException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		this.builder.notifyFeatureModelListener();
+		
+		this.builder.notifyFeatureModelListener(shell);
 	}
 
 	

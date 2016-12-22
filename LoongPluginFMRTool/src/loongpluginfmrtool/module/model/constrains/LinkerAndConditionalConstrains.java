@@ -24,6 +24,9 @@ public class LinkerAndConditionalConstrains {
 	private Map<LElement,Set<ConfigurationOption>> amethod_configuration;
 	private Map<Expression,Set<LElement>> enableconstrains = new HashMap<Expression,Set<LElement>>();
 	private Map<Expression,Set<LElement>> unableconstrains = new HashMap<Expression,Set<LElement>>();
+	private Map<ConfigurationCondition,Set<LElement>>rawenableconstrains = new HashMap<ConfigurationCondition,Set<LElement>>();
+	private Map<ConfigurationCondition,Set<LElement>>rawdisableconstrains = new HashMap<ConfigurationCondition,Set<LElement>>();
+	
 	private LFlyweightElementFactory alElementfactory;
 	
 	
@@ -88,6 +91,7 @@ public class LinkerAndConditionalConstrains {
 								Set<LElement> backwardElements = AOB.getRange(element,validrelation);
 								for (LElement backwardElement : backwardElements) {
 									addconstraints(enableconstrains,exp,backwardElement);
+									addrawconstrains(rawenableconstrains,conficondi,backwardElement);
 								}
 							}
 						}
@@ -109,6 +113,7 @@ public class LinkerAndConditionalConstrains {
 								Set<LElement> backwardElements = AOB.getRange(element,validrelation);
 								for (LElement backwardElement : backwardElements) {
 									addconstraints(unableconstrains,exp,backwardElement);
+									addrawconstrains(rawdisableconstrains,conficondi,backwardElement);
 								}
 							}
 						}
@@ -130,4 +135,37 @@ public class LinkerAndConditionalConstrains {
 			constrains.put(exp, elementset);
 		}
 	}
+	
+	protected void addrawconstrains(Map<ConfigurationCondition,Set<LElement>>rawconstrains,ConfigurationCondition cond,LElement element){
+		if(rawconstrains.containsKey(cond)){
+			Set<LElement> elementset = rawconstrains.get(cond);
+			elementset.add(element);
+			rawconstrains.put(cond, elementset);
+		}else{
+			Set<LElement> elementset = new HashSet<LElement>();
+			elementset.add(element);
+			rawconstrains.put(cond, elementset);
+		}
+	}
+	
+	
+	public Map<Expression,Set<LElement>> getEnableConstrains(){
+		return enableconstrains;
+	}
+	
+	public Map<Expression,Set<LElement>> getDisableConstrains(){
+		return unableconstrains;
+	}
+
+
+	public Map<ConfigurationCondition,Set<LElement>> getRawEnableConstrains() {
+		// TODO Auto-generated method stub
+		return rawenableconstrains;
+	}
+	
+	public Map<ConfigurationCondition,Set<LElement>> getRawDisableConstrains() {
+		// TODO Auto-generated method stub
+		return rawdisableconstrains;
+	}
+	
 }

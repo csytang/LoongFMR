@@ -4,10 +4,19 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.swt.widgets.Shell;
+
 import loongplugin.source.database.ApplicationObserver;
 import loongplugin.source.database.model.LElement;
+import loongplugin.source.database.model.LFlyweightElementFactory;
 import loongplugin.source.database.model.LRelation;
+import loongpluginfmrtool.module.model.configuration.ConfigurationCondition;
+import loongpluginfmrtool.module.model.constrains.LinkerAndConditionalConstrains;
+import loongpluginfmrtool.module.model.constrains.TypeConstrains;
 import loongpluginfmrtool.module.model.module.Module;
 import loongpluginfmrtool.module.model.module.ModuleBuilder;
 import loongpluginfmrtool.views.moduledependencyviews.HierarchicalBuilderChangedEvent;
@@ -46,11 +55,15 @@ public class HierarchicalBuilder {
 	// a map to reserve jumpto information
 	private Map<Module,HierarchicalNeighbor> sourcetoNeighbor = new HashMap<Module,HierarchicalNeighbor>();
 	
-	public HierarchicalBuilder(ModuleBuilder pbuilder){
+	// 
+	private LFlyweightElementFactory alElementfactory;
+	
+	public HierarchicalBuilder(ModuleBuilder pbuilder,LFlyweightElementFactory plElementfactory){
 		// initialize
 		this.abuilder = pbuilder;
 		this.entrymodules = new HashSet<Module>();
 		this.AOB = ApplicationObserver.getInstance();
+		this.alElementfactory = plElementfactory;
 		
 		// obtain all modules
 		this.indextoModules = this.abuilder.getIndexToModule();
@@ -71,10 +84,45 @@ public class HierarchicalBuilder {
 		for(Map.Entry<Integer, Module>entry:this.indextoModules.entrySet()){
 			Module module = entry.getValue();
 			// get all call dependencies
-			Set<Module> dependencies = module.getAllCallDependency().keySet();
-			// 
-			if(dependencies.size()!=0){
-				
+			Set<Module> calldependencies = module.getAllCallDependency().keySet();
+			// type constrains
+			TypeConstrains typeconstrains = module.getTypeConstrains();
+			Set<LElement> type_typeconstrains_LElements = typeconstrains.getTypeConstrainsLElement();
+			HierarchicalNeighbor neighbor = new HierarchicalNeighbor(module);
+			// run all elements
+			for(LElement element:type_typeconstrains_LElements){
+				CompilationUnit unit = element.getCompilationUnit();
+				LElement compelement = this.alElementfactory.getElement(unit);
+				Module targetmodule = abuilder.getModuleByLElement(compelement);
+				// if it is not the source module
+				if(targetmodule==null){
+					try {
+						throw new Exception("unkonw module");
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				if(targetmodule.getIndex()!=module.getIndex()){
+					neighbor.addNeighbor(targetmodule);
+				}
+			}
+			// linker and conditional constraints
+			LinkerAndConditionalConstrains linkercondconstrains = module.getLinkerAndConditionalConstrains();
+			Map<ConfigurationCondition,Set<LElement>> rawenabledconstrains = linkercondconstrains.getRawEnableConstrains();
+			for(Map.Entry<ConfigurationCondition, Set<LElement>>enableentry:rawenabledconstrains.entrySet()){
+				ConfigurationCondition config = enableentry.getKey();
+				Set<LElement> elements = enableentry.getValue();
+				// run all elements
+				for(LElement element:elements){
+					CompilationUnit unit = element.getCompilationUnit();
+					LElement compelement = this.alElementfactory.getElement(unit);
+					Module targetmodule = abuilder.getModuleByLElement(compelement);
+					// if it is not the source module
+					if(targetmodule.getIndex()!=module.getIndex()){
+						neighbor.addNeighbor(config, targetmodule);
+					}
+				}
 			}
 		}
 		
@@ -123,9 +171,9 @@ public class HierarchicalBuilder {
 		
 	}
 	
-	public void notifyFeatureModelListener(){
+	public void notifyFeatureModelListener(Shell shell){
 		HierarchicalBuilderChangedEvent event = new HierarchicalBuilderChangedEvent(this, this);
-		listener.hierarchicalBuilderChanged(event);
+		listener.hierarchicalBuilderChanged(event,shell);
 		
 	}
 

@@ -41,9 +41,10 @@ public class BuildModuleDependencyAction implements IObjectActionDelegate{
 		if(lDB.isInitialized(aProject)){
 			mbuilder = ModuleBuilder.getInstance(aProject, lDB);
 			if(mbuilder!=null){
-				HierarchicalBuilder hbuilder = new HierarchicalBuilder(mbuilder);
+				ModuleDependencyViewPart.getInstance();
+				HierarchicalBuilder hbuilder = new HierarchicalBuilder(mbuilder,lDB.getLFlyweightElementFactory());
 				hbuilder.setListener(ModuleDependencyViewPart.getInstance().gethierarchicalBuildereListener());
-				ModuleDependencyViewPart.getInstance().setModuleBuilder(hbuilder);
+				ModuleDependencyViewPart.getInstance().setModuleBuilder(hbuilder,shell);
 			}else{
 				Display.getCurrent().syncExec(new Runnable(){
 

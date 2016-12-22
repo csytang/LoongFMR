@@ -1,18 +1,14 @@
 package loongpluginfmrtool.module.model.constrains;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-
 import loongplugin.source.database.model.LElement;
 import loongplugin.source.database.model.LFlyweightElementFactory;
 import loongpluginfmrtool.module.model.module.Module;
@@ -23,8 +19,8 @@ public class TypeConstrains {
 	private Module amodule;
 	private LFlyweightElementFactory alElementfactory;
 	private CompilationUnit unit;
-	private Set<LElement> type_typeconstrains = new HashSet<LElement>();
-	private Map<LElement,Set<LElement>>method_typeconstrains = new HashMap<LElement,Set<LElement>>();
+	private Set<LElement> type_typeconstrains_elements = new HashSet<LElement>();
+	
 	private Set<LElement>allmethods;
 	public TypeConstrains(Module pmodule,LFlyweightElementFactory plElementfactory){
 		this.amodule = pmodule;
@@ -33,6 +29,9 @@ public class TypeConstrains {
 		findTypeConstrains();
 	}
 	
+	public Set<LElement> getTypeConstrainsLElement(){
+		return type_typeconstrains_elements;
+	}
 	public void findTypeConstrains(){
 		unit = amodule.getCompilationUnit();
 		List<AbstractTypeDeclaration> types = unit.types();
@@ -52,7 +51,7 @@ public class TypeConstrains {
 					LElement parentelement = alElementfactory.getElement(parenttypebinding);
 					if(parentelement!=null){
 						// if it is  in the system
-						type_typeconstrains.add(parentelement);
+						type_typeconstrains_elements.add(parentelement);
 					}
 				}
 				// get interface if any
@@ -64,7 +63,7 @@ public class TypeConstrains {
 						LElement interfaceelement = alElementfactory.getElement(interfacebinding);
 						if(interfaceelement!=null){
 							// if the interface is  in the system
-							type_typeconstrains.add(interfaceelement);
+							type_typeconstrains_elements.add(interfaceelement);
 						}
 					}
 				}
@@ -84,7 +83,7 @@ public class TypeConstrains {
 						LElement interfaceelement = alElementfactory.getElement(interfacebinding);
 						if(interfaceelement!=null){
 							// if the interface is  in the system
-							type_typeconstrains.add(interfaceelement);
+							type_typeconstrains_elements.add(interfaceelement);
 						}
 					}
 				}
@@ -105,7 +104,7 @@ public class TypeConstrains {
 							LElement typeelement = alElementfactory.getElement(binding);
 							if(typeelement!=null){
 								// if the interface is  in the system
-								type_typeconstrains.add(typeelement);
+								type_typeconstrains_elements.add(typeelement);
 							}
 						}
 					}

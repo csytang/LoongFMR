@@ -3,10 +3,7 @@ package loongpluginfmrtool.module;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-
-import loongpluginfmrtool.module.model.Variability;
 import loongpluginfmrtool.module.model.module.Module;
 
 public class ModuledFeature {
