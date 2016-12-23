@@ -211,13 +211,6 @@
             name="Modules with Configurations"
             restorable="true">
       </view>
-      <view
-            category="ModuleViewPart"
-            class="loongpluginfmrtool.views.moduledependencyviews.ModuleDependencyViewPart"
-            id="LoongPlugin.FMRTool.moduledependency"
-            name="Build Module Dependency View"
-            restorable="true">
-      </view>
    </extension>
    <extension
          point="org.eclipse.ui.newWizards">

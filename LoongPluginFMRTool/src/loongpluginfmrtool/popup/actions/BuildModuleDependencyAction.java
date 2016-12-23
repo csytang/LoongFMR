@@ -18,7 +18,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import loongplugin.source.database.ApplicationObserver;
 import loongpluginfmrtool.module.model.hierarchicalstructure.HierarchicalBuilder;
 import loongpluginfmrtool.module.model.module.ModuleBuilder;
-import loongpluginfmrtool.views.moduledependencyviews.ModuleDependencyViewPart;
 
 public class BuildModuleDependencyAction implements IObjectActionDelegate{
 
@@ -41,10 +40,8 @@ public class BuildModuleDependencyAction implements IObjectActionDelegate{
 		if(lDB.isInitialized(aProject)){
 			mbuilder = ModuleBuilder.getInstance(aProject, lDB);
 			if(mbuilder!=null){
-				ModuleDependencyViewPart.getInstance();
 				HierarchicalBuilder hbuilder = new HierarchicalBuilder(mbuilder,lDB.getLFlyweightElementFactory());
-				hbuilder.setListener(ModuleDependencyViewPart.getInstance().gethierarchicalBuildereListener());
-				ModuleDependencyViewPart.getInstance().setModuleBuilder(hbuilder,shell);
+				hbuilder.writetoxml();
 			}else{
 				Display.getCurrent().syncExec(new Runnable(){
 

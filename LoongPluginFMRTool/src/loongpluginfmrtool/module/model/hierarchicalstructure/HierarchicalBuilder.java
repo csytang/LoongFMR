@@ -19,8 +19,6 @@ import loongpluginfmrtool.module.model.constrains.LinkerAndConditionalConstrains
 import loongpluginfmrtool.module.model.constrains.TypeConstrains;
 import loongpluginfmrtool.module.model.module.Module;
 import loongpluginfmrtool.module.model.module.ModuleBuilder;
-import loongpluginfmrtool.views.moduledependencyviews.HierarchicalBuilderChangedEvent;
-import loongpluginfmrtool.views.moduledependencyviews.IHierarchicalBuilderChangeListener;
 import soot.Modifier;
 
 public class HierarchicalBuilder {
@@ -49,8 +47,6 @@ public class HierarchicalBuilder {
 	// index to modules
 	private Map<Integer, Module> indextoModules = null;
 	
-	// builder change listener
-	private IHierarchicalBuilderChangeListener listener = null;
 	
 	// a map to reserve jumpto information
 	private Map<Module,HierarchicalNeighbor> sourcetoNeighbor = new HashMap<Module,HierarchicalNeighbor>();
@@ -128,9 +124,7 @@ public class HierarchicalBuilder {
 		
 	}
 
-	public void setListener(IHierarchicalBuilderChangeListener plistener){
-		this.listener = plistener;
-	}
+	
 			
 	
 	/**
@@ -171,11 +165,7 @@ public class HierarchicalBuilder {
 		
 	}
 	
-	public void notifyFeatureModelListener(Shell shell){
-		HierarchicalBuilderChangedEvent event = new HierarchicalBuilderChangedEvent(this, this);
-		listener.hierarchicalBuilderChanged(event,shell);
-		
-	}
+	
 
 	public Object[] getNodes() {
 		// return all subjective underlying node in the builder
@@ -189,6 +179,18 @@ public class HierarchicalBuilder {
 			return neighbor.getAllNeighbors().toArray();
 		}else
 			return null;
+	}
+
+	/**
+	 * export the result to xml file
+	 */
+	public void writetoxml() {
+		//
+		String filepath = "";
+		
+		
+		
+		
 	}
 	
 }

@@ -45,5 +45,13 @@
 	<classpathentry kind="lib" path="trove-2.0.2.jar"/>
 	<classpathentry kind="lib" path="junit-4.12.jar"/>
 	<classpathentry kind="lib" path="commons-lang3-3.5.jar"/>
+	<classpathentry kind="lib" path="jdom-2.0.6.jar"/>
+	<classpathentry kind="lib" path="xercesImpl.jar"/>
+	<classpathentry kind="lib" path="xml-apis.jar"/>
+	<classpathentry kind="lib" path="jaxen-1.1.6.jar"/>
+	<classpathentry kind="lib" path="jdom-2.0.6-contrib.jar"/>
+	<classpathentry kind="lib" path="jdom-2.0.6-javadoc.jar"/>
+	<classpathentry kind="lib" path="jdom-2.0.6-junit.jar"/>
+	<classpathentry kind="lib" path="jdom-2.0.6-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
