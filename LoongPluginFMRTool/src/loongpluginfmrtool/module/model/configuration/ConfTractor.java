@@ -19,7 +19,7 @@ import loongplugin.source.database.model.LElement;
 import loongplugin.source.database.model.LFlyweightElementFactory;
 import loongplugin.source.database.model.LRelation;
 import loongpluginfmrtool.module.model.module.Module;
-import loongpluginfmrtool.module.util.ASTNodeWalker;
+import loongpluginfmrtool.util.ASTNodeWalker;
 
 public class ConfTractor {
 	/**

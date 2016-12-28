@@ -1,24 +1,29 @@
 package loongpluginfmrtool.module.model.hierarchicalstructure;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
+import org.jdom2.Element;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.swt.widgets.Shell;
-
 import loongplugin.source.database.ApplicationObserver;
 import loongplugin.source.database.model.LElement;
 import loongplugin.source.database.model.LFlyweightElementFactory;
 import loongplugin.source.database.model.LRelation;
 import loongpluginfmrtool.module.model.configuration.ConfigurationCondition;
+import loongpluginfmrtool.module.model.configuration.ConfigurationEntry;
 import loongpluginfmrtool.module.model.constrains.LinkerAndConditionalConstrains;
 import loongpluginfmrtool.module.model.constrains.TypeConstrains;
 import loongpluginfmrtool.module.model.module.Module;
 import loongpluginfmrtool.module.model.module.ModuleBuilder;
+import loongpluginfmrtool.util.XMLWriter;
 import soot.Modifier;
 
 public class HierarchicalBuilder {
@@ -120,6 +125,11 @@ public class HierarchicalBuilder {
 					}
 				}
 			}
+			
+			
+			
+			// 3. link the source to neighbor
+			this.sourcetoNeighbor.put(module, neighbor);
 		}
 		
 	}
@@ -165,21 +175,6 @@ public class HierarchicalBuilder {
 		
 	}
 	
-	
-
-	public Object[] getNodes() {
-		// return all subjective underlying node in the builder
-		return indextoModules.values().toArray();
-	}
-
-	public Object[] getConnectedTo(Module node) {
-		// TODO Auto-generated method stub
-		if(this.sourcetoNeighbor.containsKey(node)){
-			HierarchicalNeighbor neighbor = this.sourcetoNeighbor.get(node);
-			return neighbor.getAllNeighbors().toArray();
-		}else
-			return null;
-	}
 
 	/**
 	 * export the result to xml file
@@ -187,10 +182,74 @@ public class HierarchicalBuilder {
 	public void writetoxml() {
 		//
 		String filepath = "";
-		
-		
-		
-		
+		IProject selectedProject = this.AOB.getInitializedProject();
+		// get the project path
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();  
+		String workspacepath = workspace.getRoot().getLocation().toOSString();
+		filepath = workspacepath+File.separatorChar+selectedProject.getName()+File.separatorChar+"hierarhicalmoduledependency.xml";
+		Element rootelement = XMLWriter.createElement("HieracrhicalView");
+		XMLWriter writer = new XMLWriter(filepath,rootelement);
+		for(Map.Entry<Integer, Module>entry:indextoModules.entrySet()){
+			int index = entry.getKey();
+			Module module  = entry.getValue();
+			Element module_element = XMLWriter.createElement(module.getModuleName(), "index", module.getIndex()+"");
+			XMLWriter.addChild(rootelement, module_element);
+			
+			/************  whether is a main method ***************/
+			Element attribute;
+			if(this.entrymodules.contains(module)){
+				 attribute = XMLWriter.createElement("main", "true");
+				 XMLWriter.addChild(module_element, attribute);
+			}else{
+				 attribute = XMLWriter.createElement("main", "false");
+				 XMLWriter.addChild(module_element, attribute);
+			}
+			
+			if(!this.sourcetoNeighbor.containsKey(module)){
+			//	continue;
+				try {
+					throw new Exception("cannot find the module:"+module.getModuleName());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			
+			HierarchicalNeighbor neighbor = this.sourcetoNeighbor.get(module);
+			/************** required fixed*******************/
+			Element fixedrequired = XMLWriter.createElement("hardrequired_modules");
+			
+			Set<Module> fixedtargets = neighbor.getfixedRequired();
+			if(fixedtargets.size()!=0){
+				for(Module fixedtarget:fixedtargets){
+					Element fixelement = XMLWriter.createElement(fixedtarget.getModuleName());
+					XMLWriter.addChild(fixedrequired, fixelement);
+				}
+			}
+			XMLWriter.addChild(module_element, fixedrequired);
+			
+			/********* required under condition  ***********/
+			Element conditionalmodule = XMLWriter.createElement("conditional_modules");
+			Map<ConfigurationCondition,Set<Module>> condition_targetmodule = neighbor.getconditionalModules();
+			
+			for(Map.Entry<ConfigurationCondition, Set<Module>>cond_entry:condition_targetmodule.entrySet()){
+				ConfigurationCondition condition = cond_entry.getKey();
+				Set<Module> cond_modules = cond_entry.getValue();
+				ConfigurationEntry config_entry = condition.getConfigurationOption().getConfigurationEntry();
+				String config_entry_str = config_entry.getLElement().toString();
+				Element config_entry_str_element = XMLWriter.createElement("ConfigurationEntry", config_entry_str);
+				XMLWriter.addChild(conditionalmodule, config_entry_str_element);
+				for(Module cond_module:cond_modules){
+					int cond_module_index = cond_module.getIndex();
+					Element cond_module_element = XMLWriter.createElement(cond_module.getModuleName(), "index", cond_module_index+"");
+					XMLWriter.addChild(config_entry_str_element, cond_module_element);
+				}
+			}
+			XMLWriter.addChild(module_element, conditionalmodule);
+			
+		}
+		writer.writetoFile();
 	}
 	
 }

@@ -42,14 +42,13 @@ public class HierarchicalNeighbor {
 		fixedrequired.add(module);
 	}
 	
+	public Set<Module> getfixedRequired(){
+		return this.fixedrequired;
+	}
 	
-	public Set<Module> getAllNeighbors(){
-		 Set<Module> allneighbors = new HashSet<Module>();
-		 for(Map.Entry<ConfigurationCondition,Set<Module>>entry : this.condition_targetmodule.entrySet()){
-			 Set<Module> targets = entry.getValue();
-			 allneighbors.addAll(targets);
-		 }
-		 allneighbors.addAll(fixedrequired);
-		 return allneighbors;
+	
+	
+	public Map<ConfigurationCondition,Set<Module>> getconditionalModules(){
+		return this.condition_targetmodule;
 	}
 }

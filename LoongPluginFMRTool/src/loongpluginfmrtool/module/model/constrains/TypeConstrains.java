@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import loongplugin.source.database.model.LElement;
 import loongplugin.source.database.model.LFlyweightElementFactory;
 import loongpluginfmrtool.module.model.module.Module;
-import loongpluginfmrtool.module.model.util.TypeBindingVisitor;
+import loongpluginfmrtool.util.TypeBindingVisitor;
 
 public class TypeConstrains {
 

@@ -1,4 +1,4 @@
-package loongpluginfmrtool.module.util;
+package loongpluginfmrtool.util;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;

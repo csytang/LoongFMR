@@ -28,6 +28,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Text;
 
+import loongpluginfmrtool.module.model.hierarchicalstructure.HierarchicalBuilder;
 import loongpluginfmrtool.module.model.module.ModuleBuilder;
 
 import org.eclipse.swt.layout.GridData;
@@ -38,6 +39,7 @@ public class VMSConfigurationDialog extends Dialog {
 	private Text text;
 	private Shell shell;
 	private ModuleBuilder builder;
+	private HierarchicalBuilder hbuilder;
 	private int cluster;
 	private int populationcount;
 	private Text populationcounttext;
@@ -47,10 +49,11 @@ public class VMSConfigurationDialog extends Dialog {
 	 * Create the dialog.
 	 * @param parentShell
 	 */
-	public VMSConfigurationDialog(ModuleBuilder pbuilder,Shell parentShell) {
+	public VMSConfigurationDialog(ModuleBuilder pbuilder,HierarchicalBuilder phbuilder,Shell parentShell) {
 		super(parentShell);
 		this.shell = parentShell;
 		this.builder = pbuilder;
+		this.hbuilder = phbuilder;
 	}
 
 	/**
@@ -128,7 +131,7 @@ public class VMSConfigurationDialog extends Dialog {
 			//super.okPressed();
 			this.populationcount = Integer.parseInt(populationtextcontent);
 			this.evolutioncount = Integer.parseInt(evoluationtextcontent);
-			VariabilityModuleSystem mvs = new VariabilityModuleSystem(builder,cluster,populationcount,evolutioncount);
+			VariabilityModuleSystem mvs = new VariabilityModuleSystem(builder,hbuilder,cluster,populationcount,evolutioncount);
 		}catch(NumberFormatException e){
 			Display.getCurrent().syncExec(new Runnable(){
 

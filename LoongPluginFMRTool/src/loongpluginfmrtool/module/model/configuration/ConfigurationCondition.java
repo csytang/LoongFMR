@@ -154,5 +154,8 @@ public class ConfigurationCondition {
 		return confcond_unselect_statement;
 	}
 	
+	public ConfigurationOption getConfigurationOption(){
+		return option;
+	}
 
 }

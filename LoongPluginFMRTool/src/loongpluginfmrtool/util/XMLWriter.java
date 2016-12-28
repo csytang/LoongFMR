@@ -23,13 +23,13 @@ public class XMLWriter {
 	public XMLWriter(String filepath,Element proot){
 		this.targetfilepath = filepath;
 		this.root = proot;
-		this.doc = new Document(root);
-		this.doc.setRootElement(this.root);
 	}
 	
 	public void writetoFile(){
 		assert this.targetfilepath!=null;
 		assert this.root!=null;
+		this.doc = new Document(root);
+		//this.doc.setRootElement(this.root);
 		XMLOutputter xmloutput = new XMLOutputter();
 		xmloutput.setFormat(Format.getPrettyFormat());
 		try {
@@ -60,5 +60,9 @@ public class XMLWriter {
 		return element;
 	}
 	
+	public static Element createElement(String name){
+		Element element = new Element(name);
+		return element;
+	}
 	
 }

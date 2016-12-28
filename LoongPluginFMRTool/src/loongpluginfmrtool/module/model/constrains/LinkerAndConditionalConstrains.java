@@ -17,7 +17,7 @@ import loongpluginfmrtool.module.model.configuration.ConfigurationCondition;
 import loongpluginfmrtool.module.model.configuration.ConfigurationEntry;
 import loongpluginfmrtool.module.model.configuration.ConfigurationOption;
 import loongpluginfmrtool.module.model.module.Module;
-import loongpluginfmrtool.module.model.util.ASTVisitorLElementVisitor;
+import loongpluginfmrtool.util.ASTVisitorLElementVisitor;
 
 public class LinkerAndConditionalConstrains {
 	private Module amodule;

@@ -3,6 +3,7 @@ package loongpluginfmrtool.popup.actions;
 import java.util.Iterator;
 
 import loongplugin.source.database.ApplicationObserver;
+import loongpluginfmrtool.module.model.hierarchicalstructure.HierarchicalBuilder;
 import loongpluginfmrtool.module.model.module.ModuleBuilder;
 import loongpluginfmrtool.toolbox.acdc.ACDCConfigurationDialog;
 import loongpluginfmrtool.toolbox.mvs.VMSConfigurationDialog;
@@ -61,7 +62,8 @@ public class RecoveryFeatureModelVMS implements IObjectActionDelegate {
 			mbuilder = ModuleBuilder.getInstance(aProject, lDB);
 			mbuilder.init(true);
 			mbuilder.notifyModuleListener();
-			VMSConfigurationDialog dialog = new VMSConfigurationDialog(mbuilder,shell);
+			HierarchicalBuilder hbuilder = new HierarchicalBuilder(mbuilder,lDB.getLFlyweightElementFactory());
+			VMSConfigurationDialog dialog = new VMSConfigurationDialog(mbuilder,hbuilder,shell);
 			dialog.create();
 			dialog.open();
 		}

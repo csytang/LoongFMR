@@ -24,7 +24,7 @@ import loongpluginfmrtool.module.model.configuration.ConfTractor;
 import loongpluginfmrtool.module.model.configuration.ConfigurationOption;
 import loongpluginfmrtool.module.model.constrains.LinkerAndConditionalConstrains;
 import loongpluginfmrtool.module.model.constrains.TypeConstrains;
-import loongpluginfmrtool.module.util.ASTNodeWalker;
+import loongpluginfmrtool.util.ASTNodeWalker;
 import loongpluginfmrtool.views.moduleviews.ModuleModel;
 
 public class Module implements Serializable {
@@ -192,7 +192,7 @@ public class Module implements Serializable {
 		CompilationUnit unit = (CompilationUnit)dominateASTNode;
 		List types = unit.types();    
 		AbstractTypeDeclaration typeDec = (AbstractTypeDeclaration) types.get(0); //typeDec is the class  
-		return "Module:"+typeDec.getName().toString();
+		return typeDec.getName().toString();
 	}
 	
 	public String getNameWithPackage(){

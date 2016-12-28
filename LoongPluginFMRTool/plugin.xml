@@ -88,7 +88,7 @@
                class="loongpluginfmrtool.popup.actions.BuildModuleDependencyAction"
                icon="icons/moduledep.png"
                id="LoongPluginFMRTool.moduledependencybuilder"
-               label="Build Module Dependency View"
+               label="Build Module Dependency and Export"
                menubarPath="LoongPlugin.FMRTool.FMRecoveryJ/group1">
          </action>
          <action

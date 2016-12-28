@@ -1,4 +1,4 @@
-package loongpluginfmrtool.module.util;
+package loongpluginfmrtool.util;
 
 import java.util.HashMap;
 import java.util.HashSet;
