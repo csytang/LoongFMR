@@ -89,7 +89,12 @@ public class ModuleBuilder {
 		 job.setPriority(Job.INTERACTIVE);
 		 job.schedule();
 		 
-		
+		try {
+			job.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void notifyModuleListener() {

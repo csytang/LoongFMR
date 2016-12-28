@@ -41,8 +41,6 @@ public class VMSConfigurationDialog extends Dialog {
 	private HierarchicalBuilder hbuilder;
 	private int cluster;
 	private int populationcount;
-	private Text populationcounttext;
-	private Text evolution;
 	private int evolutioncount;
 	/**
 	 * Create the dialog.
@@ -81,24 +79,9 @@ public class VMSConfigurationDialog extends Dialog {
 		text.setLayoutData(gd_text);
 		new Label(container, SWT.NONE);
 		new Label(container, SWT.NONE);
-		
-		Label lblIndividualsIn = new Label(container, SWT.NONE);
-		lblIndividualsIn.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-		lblIndividualsIn.setText("# Individuals In Population");
-		
-		populationcounttext = new Text(container, SWT.BORDER);
-		populationcounttext.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		populationcounttext.setText("50");
 		new Label(container, SWT.NONE);
 		new Label(container, SWT.NONE);
-		
-		Label lblEvoluation = new Label(container, SWT.NONE);
-		lblEvoluation.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-		lblEvoluation.setText("# Evolution");
-		
-		evolution = new Text(container, SWT.BORDER);
-		evolution.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		evolution.setText("200");
+		new Label(container, SWT.NONE);
 		
 		
 		return container;
@@ -122,14 +105,10 @@ public class VMSConfigurationDialog extends Dialog {
 		// TODO Auto-generated method stub
 		
 		String textcontent = text.getText();
-		String populationtextcontent = populationcounttext.getText();
-		String evoluationtextcontent = evolution.getText();
+		
 		try{
 			this.cluster = Integer.parseInt(textcontent);
-			//super.okPressed();
-			this.populationcount = Integer.parseInt(populationtextcontent);
-			this.evolutioncount = Integer.parseInt(evoluationtextcontent);
-			VariabilityModuleSystem mvs = new VariabilityModuleSystem(hbuilder,cluster,populationcount,evolutioncount);
+			VariabilityModuleSystem mvs = new VariabilityModuleSystem(hbuilder,cluster);
 		}catch(NumberFormatException e){
 			Display.getCurrent().syncExec(new Runnable(){
 

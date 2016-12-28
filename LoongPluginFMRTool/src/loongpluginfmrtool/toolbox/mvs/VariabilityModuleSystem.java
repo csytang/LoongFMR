@@ -22,8 +22,9 @@ public class VariabilityModuleSystem {
 	private Map<Module,HierarchicalNeighbor> sourcetoNeighbor;
 	private ConfigurationOptionTree tree;
 	private Map<Module,Integer> module_clusterIndex = new HashMap<Module,Integer>();
+	private boolean debug = true;
 	
-	public VariabilityModuleSystem(HierarchicalBuilder phbuilder,int pcluster,int ppopulationcount,int pevoluation){
+	public VariabilityModuleSystem(HierarchicalBuilder phbuilder,int pcluster){
 		
 		this.cluster = pcluster;
 		this.hbuilder = phbuilder;
@@ -55,63 +56,122 @@ public class VariabilityModuleSystem {
 		
 		
 		// do clustering
-		// step 1.
+////////******************************RUN****************************////////
 		while(clusterres.size() > this.cluster){
 			/*
 			 * run all  clustering in clusterres and 
 			 * cluster without and configuration parent
 			 */
+			System.out.println("Current cluster size:"+clusterres.size());
 			int recruteid = -1;
-			int requiredcountforinfluence = 0;
+			int minrequiredcountforinfluence = clusterres.size();
+			Set<Module> temp_fixed_required = new HashSet<Module>();
+			Set<Module> temp_conditional_required = new HashSet<Module>();
+			
+			Set<Integer> mergedIds = new HashSet<Integer>();
+			////////*********clustering run*************************///////////
 			for(Map.Entry<Integer,Set<Module>>entry:this.clusterres.entrySet()){
 				Set<Module> moduleset = entry.getValue();
 				/*
 				 * find all fixed required for the module in the set
 				 */
-				Set<Module> temp_fixed_required = new HashSet<Module>();
+				// clean all required merge need
+				temp_fixed_required.clear();
+				
+				LinkedList<Module> rootPath;
 				for(Module md:moduleset){
 					assert this.sourcetoNeighbor.containsKey(md);
 					HierarchicalNeighbor md_neigbhor = this.sourcetoNeighbor.get(md);
+					int sourceIndex = module_clusterIndex.get(md);
 					/**
 					 * fixed required
 					 */
 					Set<Module> fixedmodules = md_neigbhor.getfixedRequired();
+					// if the fixed require module is not in the same cluster, then we will add
+					
+					for(Module fixedmd:fixedmodules){
+						if(module_clusterIndex.get(fixedmd)!=sourceIndex){
+							temp_fixed_required.add(fixedmd);
+						}
+					}
 					
 					/**
 					 * optional path from current node to its root
 					 */
-					LinkedList<Module> rootPath = getRootToNode(md);
+					rootPath = getRootToNode(md);
+					
+					// run all in the fixed required part
+					
 					if(fixedmodules!=null && fixedmodules.size()>0){
 						// there is a fixed required
 						int remark = -1;
 						for(int i = 0;i < rootPath.size();i++){
 							Module parent_i = rootPath.get(i);
 							if(fixedmodules.contains(parent_i)){
-								temp_fixed_required.add(parent_i);
-								remark = i;
-								break;
-							}
+								if(module_clusterIndex.get(parent_i)!=sourceIndex)
+									temp_fixed_required.add(parent_i);
+									remark = i;
+									break;
+								}
 						}
 						// there is a value but not count as the root
 						if(remark!=-1){
 							for(int i = remark;i < rootPath.size();i++){
-								temp_fixed_required.add(rootPath.get(i));
+								if(module_clusterIndex.get(rootPath.get(i))!=sourceIndex)
+									temp_fixed_required.add(rootPath.get(i));
 							}
 						}		
 					}
-				}
+			   }
+				
 				
 				// if the influence if larger than the current value
-				if(requiredcountforinfluence < temp_fixed_required.size()){
-					requiredcountforinfluence = temp_fixed_required.size();
+				if(minrequiredcountforinfluence > temp_fixed_required.size() && temp_fixed_required.size()>1){
+					mergedIds.clear();
+					minrequiredcountforinfluence = temp_fixed_required.size();
 					recruteid = entry.getKey();
+					mergedIds.add(recruteid);
+					for(Module required_module:temp_fixed_required){
+						int required_module_id = module_clusterIndex.get(required_module);
+						mergedIds.add(required_module_id);
+					}
 				}
-				
-				
-				
-				
+			
 			}
+			
+			if(mergedIds.size()==0)
+				break;
+			////////*********clustering run*************************///////////			
+			// merge the set in mergeIds
+			/*
+			 * change ::
+			 * clusterres
+			 * module_clusterIndex
+			 */
+			List<Integer> mergedIdList = new LinkedList<Integer>(mergedIds);
+			if(debug){
+				System.out.print("Merge:\t");
+				for(int id:mergedIdList){
+					System.out.print(id+"\t");
+				}
+				System.out.println();
+			}
+			int source = mergedIdList.get(0);
+			Set<Module> sourcemoduleset = clusterres.get(source);
+			for(int i = 1;i < mergedIdList.size();i++){
+				Set<Module> shouldmerge = clusterres.get(mergedIdList.get(i));
+				for(Module shouldmergemd:shouldmerge){
+					module_clusterIndex.put(shouldmergemd, source);
+				}
+				sourcemoduleset.addAll(shouldmerge);
+				clusterres.remove(mergedIdList.get(i));
+			}
+			clusterres.put(source, sourcemoduleset);
+			
+			
+			minrequiredcountforinfluence = clusterres.size();
 		}
+////////******************************RUN****************************////////
 
 		
 		
@@ -123,8 +183,18 @@ public class VariabilityModuleSystem {
 	
 	public LinkedList<Module> getRootToNode(Module md){
 		LinkedList<Module> rootPath = new LinkedList<Module>();
-		
-		
+		rootPath.addFirst(md);
+		Set<Module> roots = tree.getparentModules();
+		Module curr = md;
+		while(!roots.contains(curr)){
+		   Module temp= tree.getOptionalParent(curr);
+		   if(temp==null)
+			   break;
+		   rootPath.addFirst(temp);
+		   curr = temp;
+		}
+		if(curr!=md)
+			rootPath.addFirst(curr);
 		return rootPath;
 	}
 	

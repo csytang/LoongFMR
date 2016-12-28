@@ -14,20 +14,21 @@ import loongpluginfmrtool.module.model.module.Module;
 
 public class ConfigurationOptionTree {
 	
-	private Set<Module> roots;
+	
 	private HierarchicalBuilder hbuilder;
 	private Map<Module,Set<Module>> option_parentChildren = new HashMap<Module,Set<Module>>();
 	private Map<Module,Module> option_childParent = new HashMap<Module,Module>();
 	private Map<Module,HierarchicalNeighbor> module_Neighbor;
-	
+	private Set<Module> parentModules;
 	
 
 	/**
 	 * multiple roots
 	 */
-	public ConfigurationOptionTree(Set<Module> pmultipleRoots,HierarchicalBuilder phbuilder){
-		this.roots = pmultipleRoots;
+	public ConfigurationOptionTree(Set<Module> aparentModules,HierarchicalBuilder phbuilder){
+		this.parentModules = aparentModules;
 		this.hbuilder = phbuilder;
+		this.module_Neighbor = this.hbuilder.getModuleToNeighbor();
 		build();
 	}
 	
@@ -37,7 +38,7 @@ public class ConfigurationOptionTree {
 		Queue<Module> tree_queue = new LinkedList<Module>();
 		// initial
 		
-		tree_queue.addAll(roots);
+		tree_queue.addAll(parentModules);
 		
 		//  run all elements recursively
 		while(!tree_queue.isEmpty()){
@@ -48,7 +49,7 @@ public class ConfigurationOptionTree {
 				continue;
 			
 			visited.add(head);
-			Set<Module> childrens = getOptionChildren(head);
+			Set<Module> childrens = getOptionalChildren(head);
 			if(childrens==null||childrens.size()==0)
 				continue;
 			option_parentChildren.put(head, childrens);
@@ -63,10 +64,27 @@ public class ConfigurationOptionTree {
 	}
 	
 	
-	private Set<Module> getOptionChildren(Module module){
+	public Set<Module> getOptionalChildren(Module module){
 		assert this.module_Neighbor.containsKey(module);
 		HierarchicalNeighbor neighbor = this.module_Neighbor.get(module);
 		Set<Module> conditionalmodules = neighbor.getconditionalModulesSet();
 		return conditionalmodules;
+	}
+	
+	public Module getOptionalParent(Module module){
+		if(option_childParent.containsKey(module)){
+			return option_childParent.get(module);
+		}else if(parentModules.contains(module)){
+			return null;
+		}else{
+			
+			return null;
+		}
+			
+	}
+
+
+	public Set<Module> getparentModules() {
+		return parentModules;
 	}
 }

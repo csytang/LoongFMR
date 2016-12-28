@@ -48,7 +48,6 @@ public class HierarchicalBuilder {
 	 *  if there are multiple modules contains main method, then they all should
 	 *  be covered in this this#entrymodules
 	 */
-	private Set<Module> entrymodules = null;
 	
 	// index to modules
 	private Map<Integer, Module> indextoModules = null;
@@ -61,23 +60,24 @@ public class HierarchicalBuilder {
 	private LFlyweightElementFactory alElementfactory;
 	
 	private ConfigurationOptionTree configtree;
+	
+	// if a module has optional children, we deem it as parent module
+	private Set<Module> parentModules = new HashSet<Module>();
 	public HierarchicalBuilder(ModuleBuilder pbuilder,LFlyweightElementFactory plElementfactory){
 		// initialize
 		this.abuilder = pbuilder;
-		this.entrymodules = new HashSet<Module>();
+		
 		this.AOB = ApplicationObserver.getInstance();
 		this.alElementfactory = plElementfactory;
 		
 		// obtain all modules
 		this.indextoModules = this.abuilder.getIndexToModule();
 		
-		// invoke entry module finder
-		findentryModules();
 		
 		// find logical connections with relations
 		exploreAllHierchicalRelations();
 		
-		configtree = new ConfigurationOptionTree(entrymodules,this);
+		configtree = new ConfigurationOptionTree(parentModules,this);
 	}
 	
 	/**
@@ -126,6 +126,8 @@ public class HierarchicalBuilder {
 					// if it is not the source module
 					if(targetmodule.getIndex()!=module.getIndex()){
 						neighbor.addNeighbor(config, targetmodule);
+						if(!parentModules.contains(module))
+							parentModules.add(module);
 					}
 				}
 			}
@@ -141,43 +143,6 @@ public class HierarchicalBuilder {
 	
 			
 	
-	/**
-	 * Find the entry method to the application, namely the main method
-	 * @return
-	 */
-	private void findentryModules() {
-		LRelation invokedbyRelation = LRelation.T_ACCESS_METHOD;
-		
-		for(Map.Entry<Integer, Module>entry:indextoModules.entrySet()){
-			 Set<LElement> allmethods = entry.getValue().getallMethods();
-			 for(LElement elem:allmethods){
-				 MethodDeclaration methoddecl = (MethodDeclaration)elem.getASTNode();
-				 if(methoddecl.getName().toString().equals("main")&&
-						 Modifier.isPublic(methoddecl.getModifiers())){
-					 // is a main method
-					 // also check it has no caller
-					 Set<LElement> targetElements = AOB.getRange(elem,invokedbyRelation);
-					 if(targetElements==null){
-						 entrymodules.add(entry.getValue());
-						 break;
-					 }else if(targetElements.size()==0){
-						 entrymodules.add(entry.getValue());
-						 break;
-					 }
-				 }
-			 }
-		}
-		
-		if(entrymodules.size()==0){
-			try {
-				throw new Exception("Cannot find the entry module, which means no main method find in program");
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
-	}
 	
 
 	/**
@@ -201,13 +166,7 @@ public class HierarchicalBuilder {
 			
 			/************  whether is a main method ***************/
 			Element attribute;
-			if(this.entrymodules.contains(module)){
-				 attribute = XMLWriter.createElement("main", "true");
-				 XMLWriter.addChild(module_element, attribute);
-			}else{
-				 attribute = XMLWriter.createElement("main", "false");
-				 XMLWriter.addChild(module_element, attribute);
-			}
+			
 			
 			if(!this.sourcetoNeighbor.containsKey(module)){
 			//	continue;
