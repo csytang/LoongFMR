@@ -23,6 +23,7 @@ import loongpluginfmrtool.module.model.constrains.LinkerAndConditionalConstrains
 import loongpluginfmrtool.module.model.constrains.TypeConstrains;
 import loongpluginfmrtool.module.model.module.Module;
 import loongpluginfmrtool.module.model.module.ModuleBuilder;
+import loongpluginfmrtool.toolbox.mvs.ConfigurationOptionTree;
 import loongpluginfmrtool.util.XMLWriter;
 import soot.Modifier;
 
@@ -59,6 +60,7 @@ public class HierarchicalBuilder {
 	// 
 	private LFlyweightElementFactory alElementfactory;
 	
+	private ConfigurationOptionTree configtree;
 	public HierarchicalBuilder(ModuleBuilder pbuilder,LFlyweightElementFactory plElementfactory){
 		// initialize
 		this.abuilder = pbuilder;
@@ -74,6 +76,8 @@ public class HierarchicalBuilder {
 		
 		// find logical connections with relations
 		exploreAllHierchicalRelations();
+		
+		configtree = new ConfigurationOptionTree(entrymodules,this);
 	}
 	
 	/**
@@ -251,5 +255,19 @@ public class HierarchicalBuilder {
 		}
 		writer.writetoFile();
 	}
+
+	public ModuleBuilder getModuleBuilder() {
+		// TODO Auto-generated method stub
+		return abuilder;
+	}
+	
+	public Map<Module,HierarchicalNeighbor> getModuleToNeighbor(){
+		return sourcetoNeighbor;
+	}
+	
+	public ConfigurationOptionTree getConfigurationOptionTree(){
+		return configtree;
+	}
+	
 	
 }
