@@ -20,8 +20,8 @@ public class ConfigurationOptionTree {
 	private Map<Module,Module> option_childParent = new HashMap<Module,Module>();
 	private Map<Module,HierarchicalNeighbor> module_Neighbor;
 	private Set<Module> parentModules;
-	
-
+	private Map<Module,Integer> moduleLevel = new HashMap<Module,Integer>();
+	private int treeDepth = 0;
 	/**
 	 * multiple roots
 	 */
@@ -34,11 +34,16 @@ public class ConfigurationOptionTree {
 	
 	
 	private void build() {
+		
 		Set<Module> visited = new HashSet<Module>();
 		Queue<Module> tree_queue = new LinkedList<Module>();
 		// initial
 		
 		tree_queue.addAll(parentModules);
+		
+		for(Module md:parentModules){
+			moduleLevel.put(md, 1);
+		}
 		
 		//  run all elements recursively
 		while(!tree_queue.isEmpty()){
@@ -54,9 +59,13 @@ public class ConfigurationOptionTree {
 				continue;
 			option_parentChildren.put(head, childrens);
 			
+			
 			for(Module child:childrens){
 				option_childParent.put(child, head);
 				tree_queue.add(child);
+				int parentlevel = moduleLevel.get(head);
+				moduleLevel.put(child, 1+parentlevel);
+				treeDepth = 1+parentlevel;
 			}
 		}
 		
@@ -77,7 +86,6 @@ public class ConfigurationOptionTree {
 		}else if(parentModules.contains(module)){
 			return null;
 		}else{
-			
 			return null;
 		}
 			
@@ -86,5 +94,12 @@ public class ConfigurationOptionTree {
 
 	public Set<Module> getparentModules() {
 		return parentModules;
+	}
+	
+	public int getLevel(Module md){
+		if(moduleLevel.containsKey(md)){
+			return this.treeDepth-this.moduleLevel.get(md)+1;
+		}else
+			return 1;
 	}
 }

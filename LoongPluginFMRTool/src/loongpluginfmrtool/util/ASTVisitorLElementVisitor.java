@@ -45,26 +45,32 @@ public class ASTVisitorLElementVisitor extends ASTVisitor{
 	@Override
 	public boolean visit(ImportDeclaration node) {
 		LElement element = aelementfactory.getElement(node);
+	
 		assert element!=null;
 		elements.add(element);
+		
 		return super.visit(node);
 	}
 
 	@Override
 	public boolean visit(EnumDeclaration node) {
 		ITypeBinding binding = node.resolveBinding();
-		LElement element = aelementfactory.getElement(binding);
-		assert element!=null;
-		elements.add(element);
+		if(binding!=null){
+			LElement element = aelementfactory.getElement(binding);
+			assert element!=null;
+			elements.add(element);
+		}
 		return super.visit(node);
 	}
 
 	@Override
 	public boolean visit(TypeDeclaration node) {
 		ITypeBinding binding = node.resolveBinding();
-		LElement element = aelementfactory.getElement(binding);
-		assert element!=null;
-		elements.add(element);
+		if(binding!=null){
+			LElement element = aelementfactory.getElement(binding);
+			assert element!=null;
+			elements.add(element);
+		}
 		return super.visit(node);
 	}
 
@@ -80,25 +86,31 @@ public class ASTVisitorLElementVisitor extends ASTVisitor{
 
 	public boolean visit(VariableDeclarationFragment node) {
 		IVariableBinding binding = node.resolveBinding();
-		LElement element = aelementfactory.getElement(binding);
-		assert element!=null;
-		elements.add(element);
+		if(binding!=null){
+			LElement element = aelementfactory.getElement(binding);
+			assert element!=null;
+			elements.add(element);
+		}
 		return super.visit(node);
 	}
 
 	public boolean visit(SingleVariableDeclaration node) {
 		IVariableBinding binding = node.resolveBinding();
-		LElement element = aelementfactory.getElement(binding);
-		assert element!=null;
-		elements.add(element);
+		if(binding!=null){
+			LElement element = aelementfactory.getElement(binding);
+			assert element!=null;
+			elements.add(element);
+		}
 		return super.visit(node);
 	}
 
 	public boolean visit(EnumConstantDeclaration node) {
 		IVariableBinding binding = node.resolveVariable();
-		LElement element = aelementfactory.getElement(binding);
-		assert element!=null;
-		elements.add(element);
+		if(binding!=null){
+			LElement element = aelementfactory.getElement(binding);
+			assert element!=null;
+			elements.add(element);
+		}
 		return super.visit(node);
 	}
 

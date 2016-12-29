@@ -89,7 +89,8 @@ public class HierarchicalBuilder {
 		for(Map.Entry<Integer, Module>entry:this.indextoModules.entrySet()){
 			Module module = entry.getValue();
 			// get all call dependencies
-			Set<Module> calldependencies = module.getAllCallDependency().keySet();
+			// Set<Module> calldependencies = module.getAllCallDependency().keySet();
+			
 			// type constrains
 			TypeConstrains typeconstrains = module.getTypeConstrains();
 			Set<LElement> type_typeconstrains_LElements = typeconstrains.getTypeConstrainsLElement();
@@ -102,7 +103,7 @@ public class HierarchicalBuilder {
 				// if it is not the source module
 				if(targetmodule==null){
 					try {
-						throw new Exception("unkonw module");
+						throw new Exception("unknow module");
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -110,8 +111,10 @@ public class HierarchicalBuilder {
 				}
 				if(targetmodule.getIndex()!=module.getIndex()){
 					neighbor.addNeighbor(targetmodule);
+					
 				}
 			}
+			
 			// linker and conditional constraints
 			LinkerAndConditionalConstrains linkercondconstrains = module.getLinkerAndConditionalConstrains();
 			Map<ConfigurationCondition,Set<LElement>> rawenabledconstrains = linkercondconstrains.getRawEnableConstrains();
@@ -128,6 +131,7 @@ public class HierarchicalBuilder {
 						neighbor.addNeighbor(config, targetmodule);
 						if(!parentModules.contains(module))
 							parentModules.add(module);
+						neighbor.removeConditionNeighbor(targetmodule);
 					}
 				}
 			}

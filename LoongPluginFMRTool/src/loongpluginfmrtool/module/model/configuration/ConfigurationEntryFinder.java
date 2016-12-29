@@ -32,13 +32,15 @@ public class ConfigurationEntryFinder {
 			@Override
 			public boolean visit(SimpleName node) {
 				//
-				ConfigurationEntryFinder.binding = node.resolveBinding();
-				if(aLElementFactory.getElement(binding)!=null){
-					/*
-					 *  defined in system type like int number = 5;
-					 */
-					LElement element = aLElementFactory.getElement(binding);
-					configurations.add(element);
+				if(node.resolveBinding()!=null){
+					ConfigurationEntryFinder.binding = node.resolveBinding();
+					if(aLElementFactory.getElement(binding)!=null){
+						/*
+						 *  defined in system type like int number = 5;
+						 */
+						LElement element = aLElementFactory.getElement(binding);
+						configurations.add(element);
+					}
 				}
 				return false;
 			}
@@ -46,10 +48,12 @@ public class ConfigurationEntryFinder {
 			@Override
 			public boolean visit(ClassInstanceCreation node) {
 				// TODO Auto-generated method stub
-				ConfigurationEntryFinder.binding = node.resolveTypeBinding();
-				if(aLElementFactory.getElement(binding)!=null){// method defined in API
-					LElement element = aLElementFactory.getElement(binding);
-					configurations.add(element);
+				if(node.resolveTypeBinding()!=null){
+					ConfigurationEntryFinder.binding = node.resolveTypeBinding();
+					if(aLElementFactory.getElement(binding)!=null){// method defined in API
+						LElement element = aLElementFactory.getElement(binding);
+						configurations.add(element);
+					}
 				}
 				return false;
 			}
@@ -93,10 +97,12 @@ public class ConfigurationEntryFinder {
 
 			@Override
 			public boolean visit(MethodInvocation node) {
-				ConfigurationEntryFinder.binding = node.resolveMethodBinding();
-				if(aLElementFactory.getElement(binding)!=null){// method defined in API
-					LElement element = aLElementFactory.getElement(binding);
-					configurations.add(element);
+				if(node.resolveMethodBinding()!=null){
+					ConfigurationEntryFinder.binding = node.resolveMethodBinding();
+					if(aLElementFactory.getElement(binding)!=null){// method defined in API
+						LElement element = aLElementFactory.getElement(binding);
+						configurations.add(element);
+					}
 				}
 				return false;
 			}

@@ -61,4 +61,11 @@ public class HierarchicalNeighbor {
 		
 		return mds;
 	}
+
+	public void removeConditionNeighbor(Module targetmodule) {
+		// TODO Auto-generated method stub
+		if(fixedrequired.contains(targetmodule)){
+			fixedrequired.remove(targetmodule);
+		}
+	}
 }

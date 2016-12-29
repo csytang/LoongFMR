@@ -48,10 +48,12 @@ public class TypeConstrains {
 				Type superclasstype = typedecl.getSuperclassType();
 				if(superclasstype!=null){
 					ITypeBinding parenttypebinding = superclasstype.resolveBinding();
-					LElement parentelement = alElementfactory.getElement(parenttypebinding);
-					if(parentelement!=null){
-						// if it is  in the system
-						type_typeconstrains_elements.add(parentelement);
+					if(parenttypebinding!=null){
+						LElement parentelement = alElementfactory.getElement(parenttypebinding);
+						if(parentelement!=null){
+							// if it is  in the system
+							type_typeconstrains_elements.add(parentelement);
+						}
 					}
 				}
 				// get interface if any
@@ -60,10 +62,12 @@ public class TypeConstrains {
 					for(Type superinterface:superinterfaces){
 						// add the type element into constrains
 						ITypeBinding interfacebinding = superinterface.resolveBinding();
-						LElement interfaceelement = alElementfactory.getElement(interfacebinding);
-						if(interfaceelement!=null){
-							// if the interface is  in the system
-							type_typeconstrains_elements.add(interfaceelement);
+						if(interfacebinding!=null){
+							LElement interfaceelement = alElementfactory.getElement(interfacebinding);
+							if(interfaceelement!=null){
+								// if the interface is  in the system
+								type_typeconstrains_elements.add(interfaceelement);
+							}
 						}
 					}
 				}
@@ -71,6 +75,8 @@ public class TypeConstrains {
 				continue;
 			}else if(typebinding.isInterface()){
 				LElement classtarget = alElementfactory.getElement(typebinding);
+				if(classtarget==null)
+					continue;
 				ASTNode classastnode = classtarget.getASTNode();
 				assert classastnode instanceof TypeDeclaration;
 				TypeDeclaration typedecl = (TypeDeclaration)classastnode;
@@ -80,10 +86,12 @@ public class TypeConstrains {
 					for(Type superinterface:superinterfaces){
 						// add the type element into constrains
 						ITypeBinding interfacebinding = superinterface.resolveBinding();
-						LElement interfaceelement = alElementfactory.getElement(interfacebinding);
-						if(interfaceelement!=null){
-							// if the interface is  in the system
-							type_typeconstrains_elements.add(interfaceelement);
+						if(interfacebinding!=null){
+							LElement interfaceelement = alElementfactory.getElement(interfacebinding);
+							if(interfaceelement!=null){
+								// if the interface is  in the system
+								type_typeconstrains_elements.add(interfaceelement);
+							}
 						}
 					}
 				}
@@ -92,6 +100,7 @@ public class TypeConstrains {
 			}
 		}
 		// 对于每一个函数 检查里面使用的 type 信息 有没有需要引用
+		
 		if(allmethods!=null){
 			for(LElement method:allmethods){
 				ASTNode methodastnode = method.getASTNode();

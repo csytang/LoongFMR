@@ -11,6 +11,7 @@ import java.util.Set;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -93,6 +94,20 @@ public class ConfigurationOption extends ModuleComponent{
 	 * @param pmethoddecl
 	 */
 	public ConfigurationOption(EnumDeclaration enumvalue,LElement element,Expression pconfigOption,Module passociatedmodule,MethodDeclaration pmethoddecl){
+		super(passociatedmodule);
+		this.configentry = new ConfigurationEntry(this,element);
+		this.configurationcondition= new ConfigurationCondition(this,pconfigOption);
+		this.associatedmodule = passociatedmodule;
+		this.confg_relationlik = new HashSet<ConfigurationRelationLink>();
+		unit = passociatedmodule.getCompilationUnit();
+		methoddecl = pmethoddecl;
+	}
+	
+	/**
+	 * 
+	 */
+	
+	public ConfigurationOption(EnumConstantDeclaration enumvalue,LElement element,Expression pconfigOption,Module passociatedmodule,MethodDeclaration pmethoddecl){
 		super(passociatedmodule);
 		this.configentry = new ConfigurationEntry(this,element);
 		this.configurationcondition= new ConfigurationCondition(this,pconfigOption);

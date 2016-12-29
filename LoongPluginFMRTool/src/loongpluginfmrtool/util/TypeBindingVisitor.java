@@ -74,12 +74,6 @@ public class TypeBindingVisitor extends ASTVisitor{
 		return super.visit(node);
 	}
 
-	@Override
-	public boolean visit(SuperConstructorInvocation node) {
-		// TODO Auto-generated method stub
-		ITypeBinding binding = node.resolveConstructorBinding().getDeclaredReceiverType();
-		typeBindings.add(binding);
-		return super.visit(node);
-	}
+	
 
 }

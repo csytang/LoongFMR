@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -221,6 +222,22 @@ public class CongVisitor extends ASTVisitor{
 				option = new ConfigurationOption(typedecl,element,condition,associatemdule,methoddecl);
 				configuration_map_ASTNodesOption.put(node, option);
 				configurationOptions.add(option);
+			}
+		}else if(node instanceof EnumConstantDeclaration){
+			EnumConstantDeclaration enumconstdecl = (EnumConstantDeclaration)node;
+			if(configuration_map_ASTNodesOption.containsKey(node)){
+				return configuration_map_ASTNodesOption.get(node);
+			}else{
+				option = new ConfigurationOption(enumconstdecl,element,condition,associatemdule,methoddecl);
+				configuration_map_ASTNodesOption.put(node, option);
+				configurationOptions.add(option);
+			}
+		}else{
+			try {
+				throw new Exception("cannot find the type for node:"+node.toString());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 		
