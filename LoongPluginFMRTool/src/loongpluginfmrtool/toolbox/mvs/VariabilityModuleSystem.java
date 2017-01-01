@@ -29,10 +29,10 @@ public class VariabilityModuleSystem {
 	private ConfigurationOptionTree tree;
 	private Map<Module,Integer> module_clusterIndex = new HashMap<Module,Integer>();
 	private boolean debug = true;
-	private int[][] fixedrequired;
-	private int[][] conditionalrequired;
-	private int[][] fixedrequiredCluster;
-	private int[][] conditionalrequiredCluster;
+	private double[][] fixedrequired;
+	private double[][] conditionalrequired;
+	private double[][] fixedrequiredCluster;
+	private double[][] conditionalrequiredCluster;
 	private List<Integer> clusterIds = new LinkedList<Integer>();
 	private Map<Module,Set<Module>> md_conditionalmodulesmodules;
 	private Map<Module,Set<Module>> md_fixedrequiredmodulesmodules;
@@ -76,10 +76,10 @@ public class VariabilityModuleSystem {
 		md_conditionalmodulesmodules = new HashMap<Module,Set<Module>>();
 		md_fixedrequiredmodulesmodules = new HashMap<Module,Set<Module>>();
 		modulesize = indexToModule.size();
-		fixedrequired = new int[modulesize][modulesize];
-		fixedrequiredCluster = new int[modulesize][modulesize];
-		conditionalrequired = new int[modulesize][modulesize];
-		conditionalrequiredCluster = new int[modulesize][modulesize];
+		fixedrequired = new double[modulesize][modulesize];
+		fixedrequiredCluster = new double[modulesize][modulesize];
+		conditionalrequired = new double[modulesize][modulesize];
+		conditionalrequiredCluster = new double[modulesize][modulesize];
 		for(int i =0;i < modulesize;i++){
 			for(int j = 0;j < modulesize;j++){
 				if(i==j){
@@ -198,21 +198,21 @@ public class VariabilityModuleSystem {
 			int cluster_2 = -1;
 			for(int i = 0;i < clusterIds.size();i++){
 				int sourceclusterId = clusterIds.get(i);
-				int[] sourcefixed = fixedrequiredCluster[sourceclusterId];
-				double[] sourcefixed_double = copyFromIntArray(sourcefixed);
-				int[] sourceconditionfix = conditionalrequiredCluster[sourceclusterId];
-				double[] sourceconditionfix_double = copyFromIntArray(sourceconditionfix);
+				int sourceclustersize = clusterres.get(sourceclusterId).size();
+				double[] sourcefixed = fixedrequiredCluster[sourceclusterId];
+				double[] sourceconditionfix = conditionalrequiredCluster[sourceclusterId];
 				for(int j = i+1;j < clusterIds.size();j++){
 					int targetclusterId = clusterIds.get(j);
-					int[] targetfixed = fixedrequiredCluster[targetclusterId];
-					double[] targetfixed_double = copyFromIntArray(targetfixed);
-					int[] targetconditionfix = conditionalrequiredCluster[targetclusterId];
-					double[] targetconditionfix_double = copyFromIntArray(targetconditionfix);
+					int targetclustersize = clusterres.get(targetclusterId).size();
+					double[] targetfixed = fixedrequiredCluster[targetclusterId];
+					double[] targetconditionfix = conditionalrequiredCluster[targetclusterId];
 					
-					double fix_required_distance = Maths.jensenShannonDivergence(sourcefixed_double, targetfixed_double);
-					double conditional_distance = Maths.jensenShannonDivergence(sourceconditionfix_double, targetconditionfix_double);
+					double fix_required_distance = Maths.jensenShannonDivergence(sourcefixed, targetfixed);
+					double conditional_distance = Maths.jensenShannonDivergence(sourceconditionfix, targetconditionfix);
 					
-					double overalldistance = fix_required_distance+conditional_distance;
+					
+					double overalldistance = (fix_required_distance+conditional_distance)/2;
+					
 					//double overalldistance = fix_required_distance;
 					if(overalldistance < smallestdistance){
 						smallestdistance = overalldistance;
@@ -332,6 +332,8 @@ public class VariabilityModuleSystem {
 						conditionalrequiredCluster[cluster_1][i]++;
 					}
 				}
+				fixedrequiredCluster[cluster_1][i] = fixedrequiredCluster[cluster_1][i]/md_cluster_1.size();
+				conditionalrequiredCluster[cluster_1][i]=conditionalrequiredCluster[cluster_1][i] /md_cluster_1.size();
 				
 				// for i --> cluster_1
 				fixedrequiredCluster[i][cluster_1]=0;
@@ -347,6 +349,11 @@ public class VariabilityModuleSystem {
 						conditionalrequiredCluster[i][cluster_1]++;
 					}
 				}
+				
+				fixedrequiredCluster[i][cluster_1] = fixedrequiredCluster[i][cluster_1]/md_cluster.size();
+				conditionalrequiredCluster[i][cluster_1] = conditionalrequiredCluster[i][cluster_1]/md_cluster.size();
+				
+				
 				
 			}
 			

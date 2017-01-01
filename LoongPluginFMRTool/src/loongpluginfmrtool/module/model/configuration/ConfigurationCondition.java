@@ -209,6 +209,8 @@ public class ConfigurationCondition {
 			if(bindings.isEmpty())
 				continue;
 			for(IMethodBinding bind:bindings){
+				if(bind==null)
+					continue;
 				LElement element = this.LElementFactory.getElement(bind);
 				if(element==null)
 					continue;

@@ -59,6 +59,8 @@ public class CongVisitor extends ASTVisitor{
 		Set<LElement> allmethods = currmodule.getallMethods();
 		Set<IMethodBinding> methodbindings = mfinder.getMethodBinding();
 		for(IMethodBinding bind:methodbindings){
+			if(bind==null)
+				continue;
 			LElement element = aLElementFactory.getElement(bind);
 			if(element!=null){
 				if(!allmethods.contains(element)){
