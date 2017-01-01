@@ -102,4 +102,21 @@ public class ConfigurationOptionTree {
 		}else
 			return 1;
 	}
+	
+	public int getLeafNodeCount(Module md){
+		if(option_parentChildren.containsKey(md)){
+			Set<Module> childrens = option_parentChildren.get(md);
+			int count = 0;
+			if(childrens.size()==0)
+				return 1;
+			else{
+				for(Module child:childrens){
+					count+=getLeafNodeCount(child);
+				}
+				return count;
+			}
+		}else{
+			return 1;
+		}
+	}
 }

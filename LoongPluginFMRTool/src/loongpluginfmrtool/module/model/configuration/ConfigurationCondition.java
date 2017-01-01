@@ -7,8 +7,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.Statement;
+
+import loongplugin.source.database.ApplicationObserver;
+import loongplugin.source.database.model.LElement;
+import loongplugin.source.database.model.LFlyweightElementFactory;
+import loongpluginfmrtool.module.model.module.Module;
+import loongpluginfmrtool.module.model.module.ModuleBuilder;
+import loongpluginfmrtool.util.MethodBindingFinder;
 
 public class ConfigurationCondition {
 	
@@ -16,10 +25,15 @@ public class ConfigurationCondition {
 	private ConfigurationOption option;
 	private Map<Expression,Set<Statement>>confcond_select_statement = new HashMap<Expression,Set<Statement>>();
 	private Map<Expression,Set<Statement>>confcond_unselect_statement = new HashMap<Expression,Set<Statement>>();
-	
+	private LFlyweightElementFactory LElementFactory;
+	private ApplicationObserver AOB;
+	private Module module;
 	public ConfigurationCondition(ConfigurationOption poption,Expression pconfigOption){
 		option = poption;
+		module = poption.getAssociatedModule();
 		conditions.add(pconfigOption);
+		AOB = ApplicationObserver.getInstance();
+		LElementFactory = AOB.getLFlyweightElementFactory();
 	}
 	public void addConditionExpression(Expression pconfigOption) {
 		// TODO Auto-generated method stub
@@ -139,9 +153,24 @@ public class ConfigurationCondition {
 	}
 	
 	public Map<Expression,Set<Statement>> getAllEnableStatement() {
-		// TODO Auto-generated method stub
 		return confcond_select_statement;
 	}
+	
+	public Map<Expression,Set<Statement>> getAllDisableStatement(){
+		return confcond_unselect_statement;
+	}
+	
+	public Set<Statement> getAllAffectedStatement(){
+		 Set<Statement> statements = new HashSet<Statement>();
+		 for(Map.Entry<Expression, Set<Statement>>entry:confcond_select_statement.entrySet()){
+			 statements.addAll(entry.getValue());
+		 }
+		 for(Map.Entry<Expression, Set<Statement>>entry:confcond_unselect_statement.entrySet()){
+			 statements.addAll(entry.getValue());
+		 }
+		 return statements;
+	}
+	
 	
 	public Set<Statement> getDisabledStatement(Expression condition) {
 		// TODO Auto-generated method stub
@@ -154,8 +183,45 @@ public class ConfigurationCondition {
 		return confcond_unselect_statement;
 	}
 	
+	
 	public ConfigurationOption getConfigurationOption(){
 		return option;
+	}
+	public Set<Module> getAllAffectedModule() {
+		// TODO Auto-generated method stub
+		 Set<Module> affectedmodules = new HashSet<Module>();
+		 Set<Statement> statements = new HashSet<Statement>();
+		 for(Map.Entry<Expression, Set<Statement>>entry:confcond_select_statement.entrySet()){
+			 statements.addAll(entry.getValue());
+		 }
+		 for(Map.Entry<Expression, Set<Statement>>entry:confcond_unselect_statement.entrySet()){
+			 statements.addAll(entry.getValue());
+		 }
+		 affectedmodules = obtainModuleInside(statements);
+		 return affectedmodules;
+	}
+	private Set<Module> obtainModuleInside(Set<Statement> statements) {
+		Set<Module> modules = new HashSet<Module>();
+		for(Statement st:statements){
+			MethodBindingFinder finder = new MethodBindingFinder();
+			st.accept(finder);
+			Set<IMethodBinding> bindings = finder.getMethodBinding();
+			if(bindings.isEmpty())
+				continue;
+			for(IMethodBinding bind:bindings){
+				LElement element = this.LElementFactory.getElement(bind);
+				if(element==null)
+					continue;
+				CompilationUnit unit = element.getCompilationUnit();
+				LElement elementunit = this.LElementFactory.getElement(unit);
+				Module targetmd = ModuleBuilder.getModuleByLElement(elementunit);
+				if(targetmd!=this.module){
+					modules.add(targetmd);
+				}
+			}
+		}
+		
+		return modules;
 	}
 
 }

@@ -178,8 +178,7 @@ public class LimboRunner extends ClusteringAlgoRunner {
 		
 	}
 	
-	private static MaxSimData identifyMostSimClusters(
-			List<List<Double>> simMatrix) {
+	private static MaxSimData identifyMostSimClusters(List<List<Double>> simMatrix) {
 		if ( simMatrix.size() != fastClusters.size() ) {
 			throw new IllegalArgumentException("expected simMatrix.size():" + simMatrix.size() + " to be fastClusters.size(): " + fastClusters.size());
 		}
@@ -209,8 +208,7 @@ public class LimboRunner extends ClusteringAlgoRunner {
 		return msData;
 	}
 
-	private static List<List<Double>> createSimilarityMatrix(
-			ArrayList<FastCluster> clusters) {
+	private static List<List<Double>> createSimilarityMatrix(ArrayList<FastCluster> clusters) {
 
 		//HashMap<HashSet<String>, Double> map = new HashMap<HashSet<String>, Double>();
 		

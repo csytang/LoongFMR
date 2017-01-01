@@ -195,8 +195,7 @@ public class ModuleBuilder {
 	
 	
 	
-	public Module getModuleByLElement(LElement useelement) {
-		// TODO Auto-generated method stub
+	public static Module getModuleByLElement(LElement useelement) {
 		if(useelement!=null)
 			return elementToModule.get(useelement);
 		else
@@ -205,12 +204,10 @@ public class ModuleBuilder {
 	
 	
 	public Map<Integer, Module> getIndexToModule() {
-		// TODO Auto-generated method stub
 		return indexToModule;
 	}
 	
 	public ModuleCallDependencyTable getDependencyTable() {
-		// TODO Auto-generated method stub
 		if(dependency_table==null){
 			dependency_table = new ModuleCallDependencyTable(this);
 			dependency_table.buildTable();
@@ -220,9 +217,10 @@ public class ModuleBuilder {
 	
 	
 	public IProject getsubjectProject() {
-		// TODO Auto-generated method stub
 		return targetProject;
 	}
+	
+	
 	
 	
 }

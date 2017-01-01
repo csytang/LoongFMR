@@ -9,6 +9,7 @@ import java.util.Set;
 import loongpluginfmrtool.module.model.module.Module;
 import loongpluginfmrtool.util.ASTNodeHelper;
 import loongpluginfmrtool.util.ASTVisitorHelper;
+import loongpluginfmrtool.util.MethodBindingFinder;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -20,6 +21,7 @@ import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -50,11 +52,47 @@ public class CongVisitor extends ASTVisitor{
 		aLElementFactory = pLElementFactory;
 	}
 	
+	public boolean containsModuleJump(Statement statement,Module currmodule){
+		boolean containsjump = false;
+		MethodBindingFinder mfinder = new MethodBindingFinder();
+		statement.accept(mfinder);
+		Set<LElement> allmethods = currmodule.getallMethods();
+		Set<IMethodBinding> methodbindings = mfinder.getMethodBinding();
+		for(IMethodBinding bind:methodbindings){
+			LElement element = aLElementFactory.getElement(bind);
+			if(element!=null){
+				if(!allmethods.contains(element)){
+					return true;
+				}
+			}
+		}
+		
+		return containsjump;
+	}
 	public boolean visit(IfStatement node) {
 		IfStatement if_node = (IfStatement)node;
 		Expression condition = if_node.getExpression();
 		Statement then_statement = if_node.getThenStatement();
 		Statement else_statement = if_node.getElseStatement();
+		
+		// check whether it is a valid configuration
+		if(then_statement!=null){
+			if(else_statement==null){
+				if(!containsModuleJump(then_statement,associatemdule)){
+					return false;
+				}
+			}else{
+				if(containsModuleJump(then_statement,associatemdule)||
+						containsModuleJump(else_statement,associatemdule)){
+					;
+				}else{
+					return false;
+				}
+			}
+		}else{
+			return false;
+		}
+		
 		Set<LElement> elements = ConfigurationEntryFinder.getConfigurations(if_node,aLElementFactory);
 		for(LElement element:elements){
 			
@@ -90,6 +128,18 @@ public class CongVisitor extends ASTVisitor{
     	WhileStatement while_statement = (WhileStatement)node;
     	Expression condition = while_statement.getExpression();
     	Statement body = while_statement.getBody();
+    	
+    	// check whether it is a valid configuration
+    	if(body!=null){
+    		if(!containsModuleJump(body,associatemdule)){
+    			return false;
+    			
+    		}
+    	}else{
+    		return false;
+    	}
+    	
+    	
     	Set<LElement> elements = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
 		for(LElement element:elements){
 			ConfigurationOption option = createConfigurationOption(element,condition,associatemdule,methoddecl);
@@ -107,6 +157,17 @@ public class CongVisitor extends ASTVisitor{
     	DoStatement do_statement = (DoStatement) node;
     	Expression condition = do_statement.getExpression();
     	Statement body = do_statement.getBody();
+    	
+    	// check whether it is a valid configuration
+    	if(body!=null){
+    		if(!containsModuleJump(body,associatemdule)){
+    			return false;
+    			
+    		}
+    	}else{
+    		return false;
+    	}
+    	
     	Set<LElement> elements = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
 		for(LElement element:elements){
 	    	ConfigurationOption option = createConfigurationOption(element,condition,associatemdule,methoddecl);
@@ -123,6 +184,18 @@ public class CongVisitor extends ASTVisitor{
 		EnhancedForStatement enhance_statement = (EnhancedForStatement)node;
 		Expression condition = enhance_statement.getExpression();
 		Statement body = enhance_statement.getBody();
+		
+		// check whether it is a valid configuration
+    	if(body!=null){
+    		if(!containsModuleJump(body,associatemdule)){
+    			return false;
+    			
+    		}
+    	}else{
+    		return false;
+    	}
+    	
+		
 		Set<LElement> elements = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
 		for(LElement element:elements){
 	    	ConfigurationOption option = createConfigurationOption(element,condition,associatemdule,methoddecl);
@@ -139,6 +212,18 @@ public class CongVisitor extends ASTVisitor{
 		ForStatement for_statement  = (ForStatement)node;
 		Expression condition = for_statement.getExpression();
 		Statement body = for_statement.getBody();
+		
+		// check whether it is a valid configuration
+    	if(body!=null){
+    		if(!containsModuleJump(body,associatemdule)){
+    			return false;
+    			
+    		}
+    	}else{
+    		return false;
+    	}
+    	
+    	
 		Set<LElement> elements = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
 		for(LElement element:elements){
 	    	ConfigurationOption option = createConfigurationOption(element,condition,associatemdule,methoddecl);
@@ -150,21 +235,32 @@ public class CongVisitor extends ASTVisitor{
         return true;
 	}
 	
-	/** TODO: handle <i>continue</i>*/
+	/** TODO: handle <i>continue</i>
+	 * TODO: each case 
+	 * */
 	@Override 
 	public boolean visit(SwitchStatement node) {
 		SwitchStatement switch_node = (SwitchStatement)node;
 		Expression condition = switch_node.getExpression();
+		boolean constainsjump = false;
+		List<Statement> sub_statements = switch_node.statements();
+    	if(sub_statements!=null){
+    		if(!sub_statements.isEmpty()){
+    			for(Statement casestate:sub_statements){
+    				if(containsModuleJump(casestate,associatemdule)){
+    					constainsjump = true;
+    					break;
+    				}
+    			}
+    		}
+    	}
+    	if(constainsjump==false)
+    		return false;
 		Set<LElement> elements = ConfigurationEntryFinder.getConfigurations(condition,aLElementFactory);
 		for(LElement element:elements){
 	    	ConfigurationOption option = createConfigurationOption(element,condition,associatemdule,methoddecl);
-	    	List<Statement> sub_statements = switch_node.statements();
-	    	if(sub_statements!=null){
-	    		if(!sub_statements.isEmpty()){
-	    			Set<Statement>sub_statementset = new HashSet<Statement>(sub_statements);
-	    			option.addEnable_Statements(condition,sub_statementset);
-	    		}
-	    	}
+	    	Set<Statement>sub_statementset = new HashSet<Statement>(sub_statements);
+	    	option.addEnable_Statements(condition,sub_statementset);
 		}
 		return true;
 	}

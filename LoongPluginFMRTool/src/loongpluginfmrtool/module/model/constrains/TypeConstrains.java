@@ -100,7 +100,7 @@ public class TypeConstrains {
 			}
 		}
 		// 对于每一个函数 检查里面使用的 type 信息 有没有需要引用
-		
+		/*
 		if(allmethods!=null){
 			for(LElement method:allmethods){
 				ASTNode methodastnode = method.getASTNode();
@@ -120,7 +120,7 @@ public class TypeConstrains {
 				}
 			}
 		}
-		
+		*/
 		
 	}
 }
