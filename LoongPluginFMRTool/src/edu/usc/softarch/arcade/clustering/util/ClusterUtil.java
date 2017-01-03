@@ -812,8 +812,7 @@ public class ClusterUtil {
 		return clusterGain;
 	}
 
-	public static DocTopicItem computeGlobalCentroidUsingTopics(
-			ArrayList<DocTopicItem> docTopicItems) {
+	public static DocTopicItem computeGlobalCentroidUsingTopics(ArrayList<DocTopicItem> docTopicItems) {
 		int firstNonNullDocTopicItemIndex = 0;
 		for (; docTopicItems.get(firstNonNullDocTopicItemIndex) == null
 				&& firstNonNullDocTopicItemIndex < docTopicItems.size(); firstNonNullDocTopicItemIndex++) {
@@ -830,8 +829,7 @@ public class ClusterUtil {
 		return mergedDocTopicItem;
 	}
 
-	public static double computeClusterGainUsingTopics(
-			ArrayList<FastCluster> clusters) {
+	public static double computeClusterGainUsingTopics(ArrayList<FastCluster> clusters) {
 		ArrayList<DocTopicItem> docTopicItems = new ArrayList<DocTopicItem>();
 		for (FastCluster c : clusters) {
 			docTopicItems.add(c.docTopicItem);

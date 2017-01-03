@@ -214,6 +214,8 @@ public class CongVisitor extends ASTVisitor{
 		ForStatement for_statement  = (ForStatement)node;
 		Expression condition = for_statement.getExpression();
 		Statement body = for_statement.getBody();
+		if(condition==null)
+			return false;
 		
 		// check whether it is a valid configuration
     	if(body!=null){

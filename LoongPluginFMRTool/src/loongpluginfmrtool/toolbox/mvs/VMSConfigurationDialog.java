@@ -40,8 +40,7 @@ public class VMSConfigurationDialog extends Dialog {
 	private Shell shell;
 	private HierarchicalBuilder hbuilder;
 	private int cluster;
-	private int populationcount;
-	private int evolutioncount;
+	
 	/**
 	 * Create the dialog.
 	 * @param parentShell
