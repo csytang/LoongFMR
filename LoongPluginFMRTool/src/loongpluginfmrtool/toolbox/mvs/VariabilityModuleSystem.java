@@ -9,6 +9,8 @@ import java.util.Random;
 import java.util.Set;
 
 import cc.mallet.util.Maths;
+import edu.usc.softarch.arcade.topics.DocTopicItem;
+import edu.usc.softarch.arcade.topics.TopicUtil;
 import edu.usc.softarch.arcade.util.StopWatch;
 import loongpluginfmrtool.module.model.configuration.ConfigurationCondition;
 import loongpluginfmrtool.module.model.configuration.ConfigurationOption;
@@ -17,6 +19,8 @@ import loongpluginfmrtool.module.model.hierarchicalstructure.HierarchicalNeighbo
 import loongpluginfmrtool.module.model.module.Module;
 import loongpluginfmrtool.module.model.module.ModuleBuilder;
 import loongpluginfmrtool.util.ClusteringResultRSFOutput;
+import loongpluginfmrtool.util.VectorDistance;
+
 import org.eclipse.core.resources.IProject;
 
 public class VariabilityModuleSystem {
@@ -25,17 +29,19 @@ public class VariabilityModuleSystem {
 	private int cluster;
 	private Map<Integer,Set<Module>> clusterres;
 	private Map<Integer, Module> indexToModule;
-	private Map<Module,ModuleTopic> moduleToTopics;
 	private HierarchicalBuilder hbuilder;
 	private Map<Module,HierarchicalNeighbor> sourcetoNeighbor;
 	private ConfigurationOptionTree tree;
 	private Map<Module,Integer> module_clusterIndex = new HashMap<Module,Integer>();
 	private double[][] fixedrequired;
 	private double[][] conditionalrequired;
-	private Map<Module,Set<Module>> md_conditionalmodulesmodules;
-	private Map<Module,Set<Module>> md_fixedrequiredmodulesmodules;
+	private double[][] methodref;
+	
 	private int modulesize;
 	private IProject aProject;
+	private Corpus corpus;
+	
+	private Map<Module,DocTopicItem> dtItemMap;
 	/**
 	 * jensenShannonDivergence get distance
 	 * 
@@ -56,12 +62,14 @@ public class VariabilityModuleSystem {
 		this.tree = phbuilder.getConfigurationOptionTree();
 		this.aProject = this.builder.getsubjectProject();
 		
-		// build module topics
-		buildModuleTopics();
+		
 		
 		// create two tables in terms of module reference
 		initModuleReference();
-		initCenter();
+		normalizeReference();
+		
+		// build module topics
+		buildModuleTopics();
 		
 		// do the clustering task
 		performClustering();
@@ -70,19 +78,107 @@ public class VariabilityModuleSystem {
 		ClusteringResultRSFOutput.ModuledRSFOutput(clusterres,"vms",builder.getsubjectProject());
 	}
 	
+	
+
+	/**
+	 * normalize the reference 
+	 */
+	private void normalizeReference() {
+		/**
+		 * private double[][] fixedrequired;
+			private double[][] conditionalrequired;
+		 */
+		double[][] fixedrequirednormalized = new double[fixedrequired.length][fixedrequired.length];
+		double[][] conditionalrequirednormalized = new double [fixedrequired.length][fixedrequired.length];
+		double[][] methodrefnormalized = new double[fixedrequired.length][fixedrequired.length];
+		for(int i = 0;i < fixedrequired.length;i++){
+			double maxfixline = getMax(fixedrequired[i]);
+			double minfixline = getMin(fixedrequired[i]);
+			
+			double maxcondline = getMax(conditionalrequired[i]);
+			double mincondline = getMin(conditionalrequired[i]);
+			
+			double maxmethodrefline = getMax(methodref[i]);
+			double minmethodrefline = getMin(methodref[i]);
+			
+			for(int j = 0; j < fixedrequired.length;j++){
+				if(maxfixline==minfixline){
+					if(maxfixline>1){
+						fixedrequirednormalized[i][j] = 1;
+					}else{
+						fixedrequirednormalized[i][j] = 0;
+					}
+					
+				}else{
+					fixedrequirednormalized[i][j] = (fixedrequired[i][j]-minfixline)/(maxfixline-minfixline);
+				}
+				
+				
+				// conditional 
+				
+				if(maxcondline==mincondline){
+					if(maxcondline>1){
+						conditionalrequirednormalized[i][j] = 1;
+					}else{
+						conditionalrequirednormalized[i][j] = 0;
+					}
+					
+				}else{
+					conditionalrequirednormalized[i][j] = (conditionalrequired[i][j]-mincondline)/(maxcondline-mincondline);
+				}
+				
+				// mehtod ref
+				
+				if(maxmethodrefline==minmethodrefline){
+					if(maxmethodrefline>1){
+						methodrefnormalized[i][j] = 0;
+					}else{
+						methodrefnormalized[i][j] = 0;
+					}
+					
+				}else{
+					methodrefnormalized[i][j] = (methodref[i][j]-minmethodrefline)/(maxmethodrefline-minmethodrefline);
+				}
+				
+			}
+			
+		}
+		
+		fixedrequired = fixedrequirednormalized;
+		conditionalrequired = conditionalrequirednormalized;
+		methodref = methodrefnormalized;
+	}
+	
+	
+
+	public static double getMax(double[] inputArray){ 
+	    double maxValue = inputArray[0]; 
+	    for(int i=1;i < inputArray.length;i++){ 
+	      if(inputArray[i] > maxValue){ 
+	         maxValue = inputArray[i]; 
+	      } 
+	    } 
+	    return maxValue; 
+	  }
+	 
+	  // Method for getting the minimum value
+	  public static double getMin(double[] inputArray){ 
+	    double minValue = inputArray[0]; 
+	    for(int i=1;i<inputArray.length;i++){ 
+	      if(inputArray[i] < minValue){ 
+	        minValue = inputArray[i]; 
+	      } 
+	    } 
+	    return minValue; 
+	  } 
+
 	/**
 	 * build the topic modelling
 	 */
 	private void buildModuleTopics() {
-		moduleToTopics = new HashMap<Module,ModuleTopic>();
+		corpus = new Corpus(this.indexToModule.size(),this.indexToModule,this.aProject);
 		
-		
-		for(int i = 0;i < indexToModule.size();i++){
-			Module module = indexToModule.get(i);
-			ModuleTopic mtopics = new ModuleTopic(module,indexToModule.size(),this.aProject);
-		}
-		
-		
+		dtItemMap = corpus.getModuleToDocTopic();
 	}
 
 	/**
@@ -90,27 +186,26 @@ public class VariabilityModuleSystem {
 	 */
 	private void initModuleReference() {
 		// reset
-		Set<Module> temp_fixed_required = new HashSet<Module>();
-		Set<Module> temp_conditional_required = new HashSet<Module>();
-		md_conditionalmodulesmodules = new HashMap<Module,Set<Module>>();
-		md_fixedrequiredmodulesmodules = new HashMap<Module,Set<Module>>();
+		
+		
 		modulesize = indexToModule.size();
 		fixedrequired = new double[modulesize][modulesize];
 		conditionalrequired = new double[modulesize][modulesize];
+		methodref = new double[modulesize][modulesize];
+		
 		for(int i =0;i < modulesize;i++){
 			for(int j = 0;j < modulesize;j++){
 				if(i==j){
 					fixedrequired[i][j] = 1;
-					conditionalrequired[i][j] = 1;
+					conditionalrequired[i][j] = 0;
+					methodref[i][j] = 0;
 				}else{
 					fixedrequired[i][j] = 0;
 					conditionalrequired[i][j] = 0;
+					methodref[i][j] = 0;
 				}
 			}
 		}
-		
-		
-		
 	
 		// initial full set mapping
 		for(Map.Entry<Integer, Module>entry:indexToModule.entrySet()){
@@ -124,8 +219,6 @@ public class VariabilityModuleSystem {
 		for(Map.Entry<Integer,Module>entry:indexToModule.entrySet()){
 			// reset
 			
-			temp_fixed_required.clear();
-			temp_conditional_required.clear();
 			
 			
 			
@@ -143,21 +236,22 @@ public class VariabilityModuleSystem {
 			// get all fixed required
 			Set<Module> md_fixedrequired = md_neigbhor.getfixedRequired();
 				
-			Set<Module> md_fixedrequired_update = new HashSet<Module>();
-			// remove fixed required that already in the cluster
+			
 			for(Module md_fix:md_fixedrequired){
 				if(md!=md_fix){
 					int md_fix_index = md_fix.getIndex();
-					md_fixedrequired_update.add(md_fix);
-					fixedrequired[md_index][md_fix_index]=1;
+					fixedrequired[md_index][md_fix_index]=+1;
 				}
 			}
 				
-			// release this object
-			md_fixedrequired = md_fixedrequired_update;
-			md_fixedrequired_update = null;
-				
-			temp_fixed_required.addAll(md_fixedrequired);
+			Set<Module> md_methodrequired = md_neigbhor.getmethodRefence();
+			for(Module md_fix:md_methodrequired){
+				if(md!=md_fix){
+					int md_fix_index = md_fix.getIndex();
+					methodref[md_index][md_fix_index]=+1;
+				}
+			}
+			
 				
 			// just check module starts from this iteratively
 			Set<ConfigurationOption> options = md.getAllConfigurationOptions();
@@ -170,63 +264,29 @@ public class VariabilityModuleSystem {
 				Set<Module> alloptionalmds = confcond.getAllAffectedModule();
 				if(alloptionalmds.isEmpty())
 						continue;
-				temp_conditional_required.addAll(alloptionalmds);
-					
+			
 				for(Module optionalmd:alloptionalmds){
 					int md_optional_index = optionalmd.getIndex();
-					//conditionalrequired[md_optional_index][md_index]+=1;
-					//conditionalrequiredCluster[md_optional_index][md_index]+=1;
-					conditionalrequired[md_optional_index][md_index]=1;
+					conditionalrequired[md_index][md_optional_index]=+1;
 				}
 			}
 				
 				
-			// check statistic values
-			md_conditionalmodulesmodules.put(md, temp_conditional_required);
-			md_fixedrequiredmodulesmodules.put(md, temp_fixed_required);
+			
 			
 		}
 	}
 
-	/**
-	 * 初始化质心
-	 */
-	public void initCenter(){
-		// init seed
-		Set<Module> rootsModule = tree.getparentModules();
-		List<Module> rootsModuleList = new LinkedList<Module>(rootsModule);
-		Set<Module> mdset;
-		if(rootsModule.size()>=cluster){
-			for(int i = 0;i < cluster;i++){
-				mdset = new HashSet<Module>();
-				mdset.add(rootsModuleList.get(i));
-				clusterres.put(i, mdset);
-				module_clusterIndex.put(rootsModuleList.get(i), i);
-			}
-		}else{
-			for(int i =0 ;i < rootsModuleList.size();i++){
-				mdset = new HashSet<Module>();
-				mdset.add(rootsModuleList.get(i));
-				clusterres.put(i, mdset);
-				module_clusterIndex.put(rootsModuleList.get(i), i);
-			}
-			
-			// select other into clusterres
-			int need = cluster-clusterres.size();
-			
-			List<Module>randomselect = randomselect(need,rootsModule,indexToModule.values());
-			
-			// put these other seed into clusterres
-			for(int i = 0;i < randomselect.size();i++){
-				Module randmd = randomselect.get(i);
-				mdset = new HashSet<Module>();
-				mdset.add(randmd);
-				
-				int currsize = clusterres.size();
-				module_clusterIndex.put(randmd, currsize);
-				clusterres.put(currsize, mdset);
-			}
+	private void initCluster() {
+		for(Map.Entry<Integer,Module>entry:indexToModule.entrySet()){
+			int id = entry.getKey();
+			Module md = entry.getValue();
+			Set<Module> mdset = new HashSet<Module>();
+			mdset.add(md);
+			clusterres.put(id, mdset);
+			this.module_clusterIndex.put(md, id);
 		}
+		
 	}
 	
 	
@@ -237,55 +297,37 @@ public class VariabilityModuleSystem {
 		// do clustering
 		
 ////////******************************RUN****************************////////
-		// k-means
-		// initialize
-		int loop = 1;
-		boolean centerchange = true;
-		while(centerchange){
-			centerchange = false;
-			loop++;
-			System.out.println("Loop:"+loop);
-			for(int i = 0;i < indexToModule.size();i++){
-				Module module = indexToModule.get(i);
-				double cloesetdistance = Double.MAX_VALUE;
-				int mergeclusterId = -1;
-				for(Map.Entry<Integer,Set<Module>>entry:clusterres.entrySet()){
-					int clusterId = entry.getKey();
-					Set <Module> cluster = entry.getValue();
-					double distance = computedistance(module,cluster);
-					if(distance < cloesetdistance){
-						cloesetdistance = distance;
-						mergeclusterId = clusterId;
+		// hierarchial clustering
+		while(clusterres.size()>this.cluster){
+			System.out.println("current size:"+clusterres.size());
+			int merge_sourceclusterid = -1;
+			int merge_targetclusterid = -1;
+			double cloeseness = Double.MAX_VALUE;
+			
+			for(Map.Entry<Integer, Set<Module>>entry:clusterres.entrySet()){
+				int sourceclusterid = entry.getKey();
+				Set<Module> sourcemdset = entry.getValue();
+				for(Map.Entry<Integer, Set<Module>>otherentry:clusterres.entrySet()){
+					int targetclusterid = otherentry.getKey();
+					if(sourceclusterid==targetclusterid)
+						continue;
+					Set<Module> targetmdset = otherentry.getValue();
+					double distance = computedistance(sourcemdset,targetmdset);
+					if(distance==-1)
+						continue;
+					if(distance < cloeseness){
+						cloeseness = distance;
+						merge_sourceclusterid = sourceclusterid;
+						merge_targetclusterid = targetclusterid;
 					}
-				}
-				// remove module from another cluster if not in current cluster
-				//module_clusterIndex.get(key)
-				if(module_clusterIndex.containsKey(module)){
-					int oldclusterId = module_clusterIndex.get(module);
-					if(oldclusterId!=mergeclusterId){
-						// remove from old cluster
-						Set<Module> oldcluser = clusterres.get(oldclusterId);
-						oldcluser.remove(module);
-						clusterres.put(oldclusterId, oldcluser);
-						//System.out.println("alter module "+module.getId()+ "from "+ oldclusterId +" into cluster "+mergeclusterId);	
-						// add into new cluster
-						module_clusterIndex.put(module, mergeclusterId);
-						Set<Module> newcluster = clusterres.get(mergeclusterId);
-						newcluster.add(module);
-						clusterres.put(mergeclusterId, newcluster);
-						centerchange = true;
-					}
-				}else{
-					centerchange = true;
-					//System.out.println("add module "+module.getId()+" into cluster "+mergeclusterId);
-					module_clusterIndex.put(module, mergeclusterId);
-					Set<Module> newcluster = clusterres.get(mergeclusterId);
-					newcluster.add(module);
-					clusterres.put(mergeclusterId, newcluster);
 				}
 			}
-		}
 			
+			assert merge_sourceclusterid!=-1;
+			assert merge_targetclusterid!=-1;
+			System.out.println("merge "+merge_sourceclusterid+" and " +merge_targetclusterid);
+			mergecluster(merge_sourceclusterid,merge_targetclusterid);
+		}
 		
 ////////******************************RUN****************************////////
 
@@ -305,12 +347,94 @@ public class VariabilityModuleSystem {
 	
 	
 	
+	private void mergecluster(int merge_sourceclusterid, int merge_targetclusterid) {
+		Set<Module> clustersource = clusterres.get(merge_sourceclusterid);
+		Set<Module> clustertarget = clusterres.get(merge_targetclusterid);
+		for(Module md:clustertarget){
+			clustersource.add(md);
+			module_clusterIndex.put(md, merge_sourceclusterid);
+		}
+		clusterres.put(merge_sourceclusterid, clustersource);
+		clusterres.remove(merge_targetclusterid);
+		
+	}
 
+
+
+	private double computedistance(Set<Module> cluster,Set<Module>othercluster){
+		// complete-linkage agglomerative algorithm
+		double averagedisance = -1;
+		for(Module md:cluster){
+			double mddistance = getAverage(md,othercluster);
+			if(mddistance>averagedisance){
+				averagedisance = mddistance;
+			}
+		}
+		return averagedisance;
+	}
+	
+	private double getAverage(Module module, Set<Module> cluster){
+		double maxdistance = 0.0;
+		assert this.dtItemMap.containsKey(module);
+		DocTopicItem moduledoc = this.dtItemMap.get(module);
+		int sourceindex = module.getIndex();
+		double [] source_fix_vector = fixedrequired[sourceindex];
+		double [] source_cond_vector = conditionalrequired[sourceindex];
+		double [] source_method_vector = methodref[sourceindex];
+		for(Module md:cluster){
+			if(md==module)
+				continue;
+			int targetindex = md.getIndex();
+			assert this.dtItemMap.containsKey(md);
+			DocTopicItem mddoc = this.dtItemMap.get(md);
+			double [] target_fix_vector = fixedrequired[targetindex];
+			double [] target_cond_vector = conditionalrequired[targetindex];
+			double [] target_method_vector = methodref[targetindex];
+			//double distance_typelinkconstrain = VectorDistance.generalizedjaccardDistance(source_fix_vector, target_fix_vector);
+			//double distance_conditionalreference = VectorDistance.generalizedjaccardDistance(source_cond_vector, target_cond_vector);
+			double distance_typelinkconstrain = Maths.jensenShannonDivergence(source_fix_vector, target_fix_vector);
+			//System.out.println("typelink distance1:"+distance_typelinkconstrain);
+			double distance_conditionalreference = Maths.jensenShannonDivergence(source_cond_vector, target_cond_vector);
+			//System.out.println("conditional reference distance2:"+distance_conditionalreference);
+			double distance_topic = TopicUtil.jsDivergence(moduledoc, mddoc);
+			//System.out.println("topic distance2:"+distance_topic);
+			double distance_method = Maths.jensenShannonDivergence(source_method_vector, target_method_vector);
+			double overalldis = distance_typelinkconstrain+distance_method-distance_typelinkconstrain*distance_method;
+			overalldis = overalldis+distance_topic-distance_topic*overalldis;
+			overalldis = overalldis+distance_conditionalreference-distance_conditionalreference*overalldis;
+			//double overalldis = 0.3*distance_typelinkconstrain+0.3*distance_method+0.2*distance_conditionalreference+0.2*distance_topic;
+			maxdistance+=overalldis;
+		}
+		return maxdistance/cluster.size();
+	}
+	
+	
+	
+	
+	private double computedistance(Module module,Module md){
+		assert this.dtItemMap.containsKey(module);
+		DocTopicItem moduledoc = this.dtItemMap.get(module);
+		int sourceindex = module.getIndex();
+		double [] source_fix_vector = fixedrequired[sourceindex];
+		double [] source_cond_vector = conditionalrequired[sourceindex];
+		int targetindex = md.getIndex();
+		assert this.dtItemMap.containsKey(md);
+		DocTopicItem mddoc = this.dtItemMap.get(md);
+		double [] target_fix_vector = fixedrequired[targetindex];
+		double [] target_cond_vector = conditionalrequired[targetindex];
+		double distance_typelinkconstrain = Maths.jensenShannonDivergence(source_fix_vector, target_fix_vector);
+		double distance_conditionalreference = Maths.jensenShannonDivergence(source_cond_vector, target_cond_vector);
+		double distance_topic = TopicUtil.jsDivergence(moduledoc, mddoc);
+		double overalldis = distance_typelinkconstrain+distance_conditionalreference-distance_typelinkconstrain*distance_conditionalreference;
+		overalldis = overalldis+distance_topic-overalldis*distance_topic;
+		return overalldis;
+	}
 	
 	private double computedistance(Module module, Set<Module> cluster) {
 		// compute the distance from module to a cluster
 		double averagedisance = 0.0;
-		
+		assert this.dtItemMap.containsKey(module);
+		DocTopicItem moduledoc = this.dtItemMap.get(module);
 		int sourceindex = module.getIndex();
 		double [] source_fix_vector = fixedrequired[sourceindex];
 		double [] source_cond_vector = conditionalrequired[sourceindex];
@@ -318,67 +442,27 @@ public class VariabilityModuleSystem {
 			if(md==module)
 				continue;
 			int targetindex = md.getIndex();
+			assert this.dtItemMap.containsKey(md);
+			DocTopicItem mddoc = this.dtItemMap.get(md);
 			double [] target_fix_vector = fixedrequired[targetindex];
 			double [] target_cond_vector = conditionalrequired[targetindex];
-			double distance1 = Maths.jensenShannonDivergence(source_fix_vector, target_fix_vector);
-			double distance2 = Maths.jensenShannonDivergence(source_cond_vector, target_cond_vector);
-			averagedisance+=distance1;
-			averagedisance+=distance2;
+			double distance_typelinkconstrain = Maths.jensenShannonDivergence(source_fix_vector, target_fix_vector);
+			double distance_conditionalreference = Maths.jensenShannonDivergence(source_cond_vector, target_cond_vector);
+			double distance_topic = TopicUtil.jsDivergence(moduledoc, mddoc);
+			double overalldis = distance_typelinkconstrain+distance_conditionalreference-distance_typelinkconstrain*distance_conditionalreference;
+			overalldis = overalldis+distance_topic-overalldis*distance_topic;
+			averagedisance+=overalldis;
 		}
-		averagedisance = averagedisance/cluster.size();
+		if(cluster.contains(module)){
+			averagedisance = averagedisance/(cluster.size()-1);
+		}else
+			averagedisance = averagedisance/cluster.size();
 		return averagedisance;
 	}
 	
 	
 
-	/**
-	 * randomly select n modules in values
-	 * but not in rootsModule;
-	 * @param need
-	 * @param rootsModule
-	 * @param values
-	 * @return
-	 */
-	private List<Module> randomselect(int n, Set<Module> rootsModule, Collection<Module> values) {
-		assert n>0;
-		Set<Module> values_copy = new HashSet<Module>();
-		values_copy.addAll(values);
-		values_copy.removeAll(rootsModule);
-		assert n <= values_copy.size();
-		List<Module> values_copy_list = new LinkedList<Module>(values_copy);
-		Set<Integer> random_n_int = new HashSet<Integer>();
-		while(random_n_int.size()<n){
-			Random rm = new Random();
-			int randomval = rm.nextInt(n);
-			random_n_int.add(randomval);
-		}
-		List<Module> randomseeds = new LinkedList<Module>();
-		for(int i:random_n_int){
-			Module ranmd = values_copy_list.get(i);
-			randomseeds.add(ranmd);
-		}
-		
-		
-		
-		return randomseeds;
-	}
-
-	public LinkedList<Module> getRootToNode(Module md){
-		LinkedList<Module> rootPath = new LinkedList<Module>();
-		rootPath.addFirst(md);
-		Set<Module> roots = tree.getparentModules();
-		Module curr = md;
-		while(!roots.contains(curr)){
-		   Module temp= tree.getOptionalParent(curr);
-		   if(temp==null)
-			   break;
-		   rootPath.addFirst(temp);
-		   curr = temp;
-		}
-		if(curr!=md)
-			rootPath.addFirst(curr);
-		return rootPath;
-	}
+	
 	
 	
 }

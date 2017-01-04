@@ -1,13 +1,12 @@
 package loongpluginfmrtool.toolbox.mvs;
-
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-
 import cc.mallet.pipe.CharSequence2TokenSequence;
 import cc.mallet.pipe.CharSequenceLowercase;
 import cc.mallet.pipe.CharSequenceReplace;
@@ -19,17 +18,19 @@ import cc.mallet.topics.ParallelTopicModel;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 import edu.usc.softarch.arcade.topics.CamelCaseSeparatorPipe;
+import edu.usc.softarch.arcade.topics.DocTopicItem;
 import edu.usc.softarch.arcade.topics.StemmerPipe;
+import edu.usc.softarch.arcade.topics.TopicItem;
 import loongpluginfmrtool.module.model.module.Module;
 
 public class Corpus {
-	
 	
 	private String workspacePath = "";
 	private String projectPath = "";
 	private String artifactsDir = "";
 	private int numTopics;
 	private Map<Integer, Module> indexToModule;
+	private Map<Module,DocTopicItem> dtItemMap = new HashMap<Module,DocTopicItem>();
 	public Corpus(int pnumTopics,Map<Integer, Module> pindexToModule,IProject aProject){
 		this.indexToModule = pindexToModule;
 		this.workspacePath =ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
@@ -59,13 +60,19 @@ public class Corpus {
 		
 		for(Map.Entry<Integer, Module>entry:indexToModule.entrySet()){
 			Module module = entry.getValue();
+			int index = entry.getKey();
+			String name = index+":"+module.getModuleName();
 			String modulestr = module.getCompilationUnit().toString();
-			Instance instance = new Instance(modulestr, "X", module.getModuleName(),null);
+			Instance instance = new Instance(modulestr, "X",name,null);
 			instances.addThruPipe(instance);
+			
 		}
 		
 		
-		//instances.save(new File(artifactsDir+"/output.pipe"));
+		instances.save(new File(artifactsDir+"/output.pipe"));
+		
+		InstanceList previousInstances = InstanceList.load(new File(artifactsDir+"/output.pipe"));
+
 		double alpha = (double) 50 / (double) numTopics;
 		double beta = .01;
 		ParallelTopicModel model = null ;
@@ -82,7 +89,44 @@ public class Corpus {
 		int numIterations = 1000;
 		model.setNumIterations(numIterations);
 		model.setRandomSeed(10);
+		try {
+			model.estimate();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for (int instIndex = 0; instIndex < previousInstances.size(); instIndex++) {
+			DocTopicItem dtItem = new DocTopicItem();
+			dtItem.doc = instIndex;
+			
+			dtItem.source = (String)previousInstances.get(instIndex).getName();
+			String name = (String)previousInstances.get(instIndex).getName();
+			String indexstr = name.split(":")[0];
+			int index = Integer.parseInt(indexstr);
+			dtItem.topics = new ArrayList<TopicItem>();
+
+			double[] topicDistribution = model.getTopicProbabilities(instIndex);
+//			double[] topicDistribution = inferencer.getSampledDistribution(previousInstances.get(instIndex), 1000, 10, 10);
+			for (int topicIdx = 0; topicIdx < numTopics; topicIdx++) {
+				TopicItem t = new TopicItem();
+				t.topicNum = topicIdx;
+				t.proportion = topicDistribution[topicIdx];
+				dtItem.topics.add(t);
+			}
+			//dtItemList.add(dtItem);
+			
+			Module md = this.indexToModule.get(index);
+			assert md!=null;
+			dtItemMap.put(md, dtItem);
+			
+			
+		}
 		
-		
+		assert dtItemMap.size()==previousInstances.size();
+	}
+	
+	
+	public Map<Module,DocTopicItem> getModuleToDocTopic(){
+		return this.dtItemMap;
 	}
 }

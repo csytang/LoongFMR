@@ -12,7 +12,7 @@ public class HierarchicalNeighbor {
 	private Module asource;
 	private Map<ConfigurationCondition,Set<Module>> condition_targetmodule = new HashMap<ConfigurationCondition,Set<Module>>();
 	private Set<Module> fixedrequired = new HashSet<Module>();
-	
+	private Set<Module> methodreference = new HashSet<Module>();
 	public HierarchicalNeighbor(Module psource){
 		this.asource = psource;
 	}
@@ -42,11 +42,17 @@ public class HierarchicalNeighbor {
 		fixedrequired.add(module);
 	}
 	
+	public void addMethodRef(Module module){
+		methodreference.add(module);
+	}
+	
 	public Set<Module> getfixedRequired(){
 		return this.fixedrequired;
 	}
 	
-	
+	public Set<Module> getmethodRefence(){
+		return this.methodreference;
+	}
 	
 	public Map<ConfigurationCondition,Set<Module>> getconditionalModules(){
 		return this.condition_targetmodule;

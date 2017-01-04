@@ -23,6 +23,7 @@ import loongplugin.source.database.model.LFlyweightElementFactory;
 import loongpluginfmrtool.module.model.configuration.ConfTractor;
 import loongpluginfmrtool.module.model.configuration.ConfigurationOption;
 import loongpluginfmrtool.module.model.constrains.LinkerAndConditionalConstrains;
+import loongpluginfmrtool.module.model.constrains.MethodReference;
 import loongpluginfmrtool.module.model.constrains.TypeConstrains;
 import loongpluginfmrtool.util.ASTNodeWalker;
 import loongpluginfmrtool.views.moduleviews.ModuleModel;
@@ -48,7 +49,7 @@ public class Module implements Serializable {
 	/************constrains***************/
 	private LinkerAndConditionalConstrains linkcondconstains = null;
 	private TypeConstrains typeconstrains = null;
-	
+	private MethodReference methodconstrains = null;
 	
 	public Module(LElement element,int index,LFlyweightElementFactory pElementFactory,ModuleBuilder mbuilder,ModuleModel pmodel){
 		this.dominate = element;
@@ -276,6 +277,9 @@ public class Module implements Serializable {
 		
 		typeconstrains = new TypeConstrains(this,this.lElementfactory);
 		
+		// 3. method reference
+		
+		methodconstrains = new MethodReference(this,this.lElementfactory);
 	}
 
 	/**
@@ -293,6 +297,11 @@ public class Module implements Serializable {
 	 */
 	public LinkerAndConditionalConstrains getLinkerAndConditionalConstrains(){
 		return linkcondconstains;
+	}
+	
+	
+	public MethodReference getMethodReference(){
+		return methodconstrains;
 	}
 
 	

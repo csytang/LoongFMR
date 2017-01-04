@@ -768,8 +768,7 @@ public class ClusterUtil {
 		return centroidSum / clusterCentroids.size();
 	}
 
-	public static double computeClusterGainUsingStructuralDataFromFeatureVectorMap(
-			ArrayList<Cluster> clusters) {
+	public static double computeClusterGainUsingStructuralDataFromFeatureVectorMap(ArrayList<Cluster> clusters) {
 		ArrayList<Double> clusterCentroids = new ArrayList<Double>();
 
 		for (Cluster c : clusters) {

@@ -20,6 +20,7 @@ import loongplugin.source.database.model.LRelation;
 import loongpluginfmrtool.module.model.configuration.ConfigurationCondition;
 import loongpluginfmrtool.module.model.configuration.ConfigurationEntry;
 import loongpluginfmrtool.module.model.constrains.LinkerAndConditionalConstrains;
+import loongpluginfmrtool.module.model.constrains.MethodReference;
 import loongpluginfmrtool.module.model.constrains.TypeConstrains;
 import loongpluginfmrtool.module.model.module.Module;
 import loongpluginfmrtool.module.model.module.ModuleBuilder;
@@ -63,6 +64,8 @@ public class HierarchicalBuilder {
 	
 	// if a module has optional children, we deem it as parent module
 	private Set<Module> parentModules = new HashSet<Module>();
+	
+	
 	public HierarchicalBuilder(ModuleBuilder pbuilder,LFlyweightElementFactory plElementfactory){
 		// initialize
 		this.abuilder = pbuilder;
@@ -80,6 +83,7 @@ public class HierarchicalBuilder {
 		configtree = new ConfigurationOptionTree(parentModules,this);
 	}
 	
+	
 	/**
 	 * this function will explore all modules and find the hierarchical relation
 	 * dependencies
@@ -93,6 +97,8 @@ public class HierarchicalBuilder {
 			
 			// type constrains
 			TypeConstrains typeconstrains = module.getTypeConstrains();
+			
+			
 			Set<LElement> type_typeconstrains_LElements = typeconstrains.getTypeConstrainsLElement();
 			HierarchicalNeighbor neighbor = new HierarchicalNeighbor(module);
 			// run all elements
@@ -115,6 +121,32 @@ public class HierarchicalBuilder {
 				}
 			}
 			
+			// method reference
+			MethodReference methodref = module.getMethodReference();
+			Set<LElement> methodref_constrains_LElements = methodref.getMethodReferenceConstrainsLElement();
+			// run all elements
+			for(LElement element:methodref_constrains_LElements){
+				CompilationUnit unit = element.getCompilationUnit();
+				LElement compelement = this.alElementfactory.getElement(unit);
+				Module targetmodule = abuilder.getModuleByLElement(compelement);
+				// if it is not the source module
+				if(targetmodule==null){
+					try {
+						throw new Exception("unknow module");
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				if(targetmodule.getIndex()!=module.getIndex()){
+					neighbor.addMethodRef(targetmodule);
+				}
+			}
+			
+			
+			
+			
+			
 			// linker and conditional constraints
 			LinkerAndConditionalConstrains linkercondconstrains = module.getLinkerAndConditionalConstrains();
 			Map<ConfigurationCondition,Set<LElement>> rawenabledconstrains = linkercondconstrains.getRawEnableConstrains();
@@ -135,6 +167,8 @@ public class HierarchicalBuilder {
 					}
 				}
 			}
+			
+			
 			
 			
 			
