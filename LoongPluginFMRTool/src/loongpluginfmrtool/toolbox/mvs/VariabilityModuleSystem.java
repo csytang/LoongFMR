@@ -22,6 +22,7 @@ import loongpluginfmrtool.util.ClusteringResultRSFOutput;
 import loongpluginfmrtool.util.VectorDistance;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.swt.widgets.Shell;
 
 public class VariabilityModuleSystem {
 	
@@ -36,11 +37,11 @@ public class VariabilityModuleSystem {
 	private double[][] fixedrequired;
 	private double[][] conditionalrequired;
 	private double[][] methodref;
-	
+	private Module mainModule;
 	private int modulesize;
 	private IProject aProject;
 	private Corpus corpus;
-	
+	private Set<Module> commonmodules = new HashSet<Module>();
 	private Map<Module,DocTopicItem> dtItemMap;
 	/**
 	 * jensenShannonDivergence get distance
@@ -51,7 +52,7 @@ public class VariabilityModuleSystem {
 	
 	
 	
-	public VariabilityModuleSystem(HierarchicalBuilder phbuilder,int pcluster){
+	public VariabilityModuleSystem(HierarchicalBuilder phbuilder,int pcluster,Module entrancemodule){
 		
 		this.cluster = pcluster;
 		this.hbuilder = phbuilder;
@@ -71,6 +72,10 @@ public class VariabilityModuleSystem {
 		// build module topics
 		buildModuleTopics();
 		
+		// find common module;
+		findCommonModule();
+		
+		
 		// do the clustering task
 		performClustering();
 		
@@ -78,6 +83,12 @@ public class VariabilityModuleSystem {
 		ClusteringResultRSFOutput.ModuledRSFOutput(clusterres,"vms",builder.getsubjectProject());
 	}
 	
+	
+
+	private void findCommonModule(){
+		
+		
+	}
 	
 
 	/**
@@ -276,18 +287,6 @@ public class VariabilityModuleSystem {
 			
 		}
 	}
-
-	private void initCluster() {
-		for(Map.Entry<Integer,Module>entry:indexToModule.entrySet()){
-			int id = entry.getKey();
-			Module md = entry.getValue();
-			Set<Module> mdset = new HashSet<Module>();
-			mdset.add(md);
-			clusterres.put(id, mdset);
-			this.module_clusterIndex.put(md, id);
-		}
-		
-	}
 	
 	
 	public void performClustering(){
@@ -298,36 +297,6 @@ public class VariabilityModuleSystem {
 		
 ////////******************************RUN****************************////////
 		// hierarchial clustering
-		while(clusterres.size()>this.cluster){
-			System.out.println("current size:"+clusterres.size());
-			int merge_sourceclusterid = -1;
-			int merge_targetclusterid = -1;
-			double cloeseness = Double.MAX_VALUE;
-			
-			for(Map.Entry<Integer, Set<Module>>entry:clusterres.entrySet()){
-				int sourceclusterid = entry.getKey();
-				Set<Module> sourcemdset = entry.getValue();
-				for(Map.Entry<Integer, Set<Module>>otherentry:clusterres.entrySet()){
-					int targetclusterid = otherentry.getKey();
-					if(sourceclusterid==targetclusterid)
-						continue;
-					Set<Module> targetmdset = otherentry.getValue();
-					double distance = computedistance(sourcemdset,targetmdset);
-					if(distance==-1)
-						continue;
-					if(distance < cloeseness){
-						cloeseness = distance;
-						merge_sourceclusterid = sourceclusterid;
-						merge_targetclusterid = targetclusterid;
-					}
-				}
-			}
-			
-			assert merge_sourceclusterid!=-1;
-			assert merge_targetclusterid!=-1;
-			System.out.println("merge "+merge_sourceclusterid+" and " +merge_targetclusterid);
-			mergecluster(merge_sourceclusterid,merge_targetclusterid);
-		}
 		
 ////////******************************RUN****************************////////
 
@@ -407,62 +376,13 @@ public class VariabilityModuleSystem {
 		}
 		return maxdistance/cluster.size();
 	}
-	
-	
-	
-	
-	private double computedistance(Module module,Module md){
-		assert this.dtItemMap.containsKey(module);
-		DocTopicItem moduledoc = this.dtItemMap.get(module);
-		int sourceindex = module.getIndex();
-		double [] source_fix_vector = fixedrequired[sourceindex];
-		double [] source_cond_vector = conditionalrequired[sourceindex];
-		int targetindex = md.getIndex();
-		assert this.dtItemMap.containsKey(md);
-		DocTopicItem mddoc = this.dtItemMap.get(md);
-		double [] target_fix_vector = fixedrequired[targetindex];
-		double [] target_cond_vector = conditionalrequired[targetindex];
-		double distance_typelinkconstrain = Maths.jensenShannonDivergence(source_fix_vector, target_fix_vector);
-		double distance_conditionalreference = Maths.jensenShannonDivergence(source_cond_vector, target_cond_vector);
-		double distance_topic = TopicUtil.jsDivergence(moduledoc, mddoc);
-		double overalldis = distance_typelinkconstrain+distance_conditionalreference-distance_typelinkconstrain*distance_conditionalreference;
-		overalldis = overalldis+distance_topic-overalldis*distance_topic;
-		return overalldis;
-	}
-	
-	private double computedistance(Module module, Set<Module> cluster) {
-		// compute the distance from module to a cluster
-		double averagedisance = 0.0;
-		assert this.dtItemMap.containsKey(module);
-		DocTopicItem moduledoc = this.dtItemMap.get(module);
-		int sourceindex = module.getIndex();
-		double [] source_fix_vector = fixedrequired[sourceindex];
-		double [] source_cond_vector = conditionalrequired[sourceindex];
-		for(Module md:cluster){
-			if(md==module)
-				continue;
-			int targetindex = md.getIndex();
-			assert this.dtItemMap.containsKey(md);
-			DocTopicItem mddoc = this.dtItemMap.get(md);
-			double [] target_fix_vector = fixedrequired[targetindex];
-			double [] target_cond_vector = conditionalrequired[targetindex];
-			double distance_typelinkconstrain = Maths.jensenShannonDivergence(source_fix_vector, target_fix_vector);
-			double distance_conditionalreference = Maths.jensenShannonDivergence(source_cond_vector, target_cond_vector);
-			double distance_topic = TopicUtil.jsDivergence(moduledoc, mddoc);
-			double overalldis = distance_typelinkconstrain+distance_conditionalreference-distance_typelinkconstrain*distance_conditionalreference;
-			overalldis = overalldis+distance_topic-overalldis*distance_topic;
-			averagedisance+=overalldis;
-		}
-		if(cluster.contains(module)){
-			averagedisance = averagedisance/(cluster.size()-1);
-		}else
-			averagedisance = averagedisance/cluster.size();
-		return averagedisance;
-	}
-	
-	
 
-	
+
+
+	public void setselectedmodule(Module selected) {
+		// TODO Auto-generated method stub
+		mainModule = selected;
+	}
 	
 	
 }

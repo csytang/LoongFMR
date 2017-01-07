@@ -1,17 +1,11 @@
 package loongpluginfmrtool.toolbox.mvs;
 
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -29,18 +23,25 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Text;
 
 import loongpluginfmrtool.module.model.hierarchicalstructure.HierarchicalBuilder;
+import loongpluginfmrtool.module.model.module.Module;
 import loongpluginfmrtool.module.model.module.ModuleBuilder;
 
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.widgets.Combo;
 
 public class VMSConfigurationDialog extends Dialog {
 	private Text text;
 	private Shell shell;
 	private HierarchicalBuilder hbuilder;
 	private int cluster;
-	
+	private Combo combo;
+	private Map<Integer,Module> comboIndextoModule = new HashMap<Integer,Module>();
+	private List<Module> mdset = new LinkedList<Module>();
+	private Module entranceModule;
 	/**
 	 * Create the dialog.
 	 * @param parentShell
@@ -48,6 +49,8 @@ public class VMSConfigurationDialog extends Dialog {
 	public VMSConfigurationDialog(HierarchicalBuilder phbuilder,Shell parentShell) {
 		super(parentShell);
 		this.shell = parentShell;
+		Set<Module> mutiplemoduleset= phbuilder.getConfigurationOptionTree().getparentModules();
+		this.mdset = new LinkedList<Module>(mutiplemoduleset);
 		this.hbuilder = phbuilder;
 	}
 
@@ -81,6 +84,34 @@ public class VMSConfigurationDialog extends Dialog {
 		new Label(container, SWT.NONE);
 		new Label(container, SWT.NONE);
 		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		
+		Label lblEntranceModule = new Label(container, SWT.NONE);
+		lblEntranceModule.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		lblEntranceModule.setText("Entrance Module");
+		
+		combo = new Combo(container, SWT.NONE);
+		combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		for(int i = 0;i < mdset.size();i++){
+			Module md = mdset.get(i);
+			
+			combo.add(md.getModuleName(), i);
+			comboIndextoModule.put(i, md);
+		}
+		
+		combo.addSelectionListener(new SelectionAdapter(){
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				int currentSelecitonIndex = combo.getSelectionIndex();
+				if(currentSelecitonIndex==-1)
+					return;
+				
+				entranceModule = comboIndextoModule.get(currentSelecitonIndex); 
+				
+			}
+		});
 		
 		
 		return container;
@@ -107,7 +138,7 @@ public class VMSConfigurationDialog extends Dialog {
 		
 		try{
 			this.cluster = Integer.parseInt(textcontent);
-			VariabilityModuleSystem mvs = new VariabilityModuleSystem(hbuilder,cluster);
+			VariabilityModuleSystem mvs = new VariabilityModuleSystem(hbuilder,cluster,entranceModule);
 		}catch(NumberFormatException e){
 			Display.getCurrent().syncExec(new Runnable(){
 
