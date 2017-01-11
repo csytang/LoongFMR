@@ -1,11 +1,14 @@
 package loongpluginfmrtool.toolbox.mvs;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -22,6 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Text;
 
+import loongplugin.source.database.model.LElement;
 import loongpluginfmrtool.module.model.hierarchicalstructure.HierarchicalBuilder;
 import loongpluginfmrtool.module.model.module.Module;
 import loongpluginfmrtool.module.model.module.ModuleBuilder;
@@ -36,24 +40,43 @@ import org.eclipse.swt.widgets.Combo;
 public class VMSConfigurationDialog extends Dialog {
 	private Text text;
 	private Shell shell;
-	private HierarchicalBuilder hbuilder;
+	private ModuleBuilder builder;
 	private int cluster;
 	private Combo combo;
+	private Combo comboEntranceMethod;
 	private Map<Integer,Module> comboIndextoModule = new HashMap<Integer,Module>();
+	private Map<Integer,LElement> comboIndextoMethod = new HashMap<Integer,LElement>();
 	private List<Module> mdset = new LinkedList<Module>();
 	private Module entranceModule;
+	private LElement entranceMethod;
+	
 	/**
 	 * Create the dialog.
 	 * @param parentShell
 	 */
-	public VMSConfigurationDialog(HierarchicalBuilder phbuilder,Shell parentShell) {
+	public VMSConfigurationDialog(ModuleBuilder mbuilder,Shell parentShell) {
 		super(parentShell);
 		this.shell = parentShell;
-		Set<Module> mutiplemoduleset= phbuilder.getConfigurationOptionTree().getparentModules();
+		Set<Module> mutiplemoduleset= new HashSet<Module>(mbuilder.getIndexToModule().values());
+		mutiplemoduleset = refinemainset(mutiplemoduleset);
 		this.mdset = new LinkedList<Module>(mutiplemoduleset);
-		this.hbuilder = phbuilder;
+		this.builder = mbuilder;
 	}
 
+	
+	protected Set<Module> refinemainset(Set<Module> parentmoduleset){
+		Set<Module>mainmodules = new HashSet<Module>();
+		for(Module md:parentmoduleset){
+			if(md.hasMainMethod()){
+				mainmodules.add(md);
+			}
+		}
+		if(mainmodules.isEmpty()){
+			return parentmoduleset;
+		}
+		return mainmodules;
+	}
+	
 	/**
 	 * Create contents of the dialog.
 	 * @param parent
@@ -73,7 +96,7 @@ public class VMSConfigurationDialog extends Dialog {
 		
 		Label lblNewLabel = new Label(container, SWT.NONE);
 		lblNewLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-		lblNewLabel.setText("# Clusters Prefered");
+		lblNewLabel.setText("# Optional Modules Preferred");
 		
 		text = new Text(container, SWT.BORDER);
 		GridData gd_text = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
@@ -93,12 +116,42 @@ public class VMSConfigurationDialog extends Dialog {
 		
 		combo = new Combo(container, SWT.NONE);
 		combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		
+		Label lblEntranceMethod = new Label(container, SWT.NONE);
+		lblEntranceMethod.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		lblEntranceMethod.setText("Entrance Method");
+		
+		comboEntranceMethod = new Combo(container, SWT.NONE);
+		comboEntranceMethod.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		
+		comboEntranceMethod.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				int currentSelectionIndex = comboEntranceMethod.getSelectionIndex();
+				if(currentSelectionIndex==-1)
+					return;
+				
+				entranceMethod = comboIndextoMethod.get(currentSelectionIndex);
+				
+			}
+		});
+		
+		// add content to comb modules
 		for(int i = 0;i < mdset.size();i++){
 			Module md = mdset.get(i);
 			
-			combo.add(md.getModuleName(), i);
+			combo.add(md.getDisplayName(), i);
 			comboIndextoModule.put(i, md);
 		}
+		
+		
 		
 		combo.addSelectionListener(new SelectionAdapter(){
 
@@ -109,6 +162,25 @@ public class VMSConfigurationDialog extends Dialog {
 					return;
 				
 				entranceModule = comboIndextoModule.get(currentSelecitonIndex); 
+				List<LElement> allmethodsselected = new LinkedList(entranceModule.getallMethods());
+				comboEntranceMethod.removeAll();
+				comboIndextoMethod.clear();
+				
+				// run all elements
+				for(int i = 0;i < allmethodsselected.size();i++){
+					MethodDeclaration methoddecl = (MethodDeclaration)allmethodsselected.get(i).getASTNode();
+					String fullmethodName = "";
+					fullmethodName+=methoddecl.getName().toString();
+					
+					Type returntype = methoddecl.getReturnType2();
+					if(returntype!=null){
+						fullmethodName+="::";
+						fullmethodName+=returntype.toString();
+					}
+					//fullmethodName+=methoddecl.getReturnType().toString();
+					comboEntranceMethod.add(fullmethodName, i);
+					comboIndextoMethod.put(i, allmethodsselected.get(i));
+				}
 				
 			}
 		});
@@ -138,7 +210,9 @@ public class VMSConfigurationDialog extends Dialog {
 		
 		try{
 			this.cluster = Integer.parseInt(textcontent);
-			VariabilityModuleSystem mvs = new VariabilityModuleSystem(hbuilder,cluster,entranceModule);
+			
+			
+			VariabilityModuleSystem mvs = new VariabilityModuleSystem(builder,cluster,entranceModule,entranceMethod);
 		}catch(NumberFormatException e){
 			Display.getCurrent().syncExec(new Runnable(){
 
@@ -159,7 +233,7 @@ public class VMSConfigurationDialog extends Dialog {
 	 */
 	@Override
 	protected Point getInitialSize() {
-		return new Point(405, 207);
+		return new Point(491, 273);
 	}
 
 }

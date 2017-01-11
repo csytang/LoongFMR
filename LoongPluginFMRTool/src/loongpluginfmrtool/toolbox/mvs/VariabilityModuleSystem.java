@@ -1,17 +1,16 @@
 package loongpluginfmrtool.toolbox.mvs;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Random;
+import java.util.Queue;
 import java.util.Set;
-
 import cc.mallet.util.Maths;
 import edu.usc.softarch.arcade.topics.DocTopicItem;
 import edu.usc.softarch.arcade.topics.TopicUtil;
 import edu.usc.softarch.arcade.util.StopWatch;
+import loongplugin.source.database.model.LElement;
+import loongplugin.source.database.model.LFlyweightElementFactory;
 import loongpluginfmrtool.module.model.configuration.ConfigurationCondition;
 import loongpluginfmrtool.module.model.configuration.ConfigurationOption;
 import loongpluginfmrtool.module.model.hierarchicalstructure.HierarchicalBuilder;
@@ -19,10 +18,10 @@ import loongpluginfmrtool.module.model.hierarchicalstructure.HierarchicalNeighbo
 import loongpluginfmrtool.module.model.module.Module;
 import loongpluginfmrtool.module.model.module.ModuleBuilder;
 import loongpluginfmrtool.util.ClusteringResultRSFOutput;
-import loongpluginfmrtool.util.VectorDistance;
+import loongpluginfmrtool.util.MathUtil;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 public class VariabilityModuleSystem {
 	
@@ -30,19 +29,23 @@ public class VariabilityModuleSystem {
 	private int cluster;
 	private Map<Integer,Set<Module>> clusterres;
 	private Map<Integer, Module> indexToModule;
-	private HierarchicalBuilder hbuilder;
-	private Map<Module,HierarchicalNeighbor> sourcetoNeighbor;
-	private ConfigurationOptionTree tree;
 	private Map<Module,Integer> module_clusterIndex = new HashMap<Module,Integer>();
-	private double[][] fixedrequired;
-	private double[][] conditionalrequired;
-	private double[][] methodref;
 	private Module mainModule;
+	private LElement mainmethod;
 	private int modulesize;
 	private IProject aProject;
 	private Corpus corpus;
+	private LFlyweightElementFactory aLElementFactory;
 	private Set<Module> commonmodules = new HashSet<Module>();
 	private Map<Module,DocTopicItem> dtItemMap;
+	private boolean debug = true;
+	private HierarchicalBuilder hbuilder;
+	private Map<Module,HierarchicalNeighbor> sourcetoNeighbor;
+	private ConfigurationOptionTree tree;
+	private double[][] fixedrequired;
+	private double[][] conditionalrequired;
+	private double[][] methodref;
+	private int commonClusterIndex = -1;
 	/**
 	 * jensenShannonDivergence get distance
 	 * 
@@ -52,28 +55,30 @@ public class VariabilityModuleSystem {
 	
 	
 	
-	public VariabilityModuleSystem(HierarchicalBuilder phbuilder,int pcluster,Module entrancemodule){
+	public VariabilityModuleSystem(ModuleBuilder pbuilder,int pcluster,Module entrancemodule,LElement method){
 		
 		this.cluster = pcluster;
-		this.hbuilder = phbuilder;
-		this.builder = phbuilder.getModuleBuilder();
-		this.sourcetoNeighbor = hbuilder.getModuleToNeighbor();
+		this.builder = pbuilder;
 		this.indexToModule = builder.getIndexToModule();
 		this.clusterres = new HashMap<Integer,Set<Module>>();
-		this.tree = phbuilder.getConfigurationOptionTree();
 		this.aProject = this.builder.getsubjectProject();
-		
-		
-		
-		// create two tables in terms of module reference
-		initModuleReference();
-		normalizeReference();
-		
+		this.aLElementFactory = builder.getLElementFactory();
+		this.mainmethod = method;
+	
 		// build module topics
 		buildModuleTopics();
 		
 		// find common module;
 		findCommonModule();
+		if(debug)
+			printCommonModules();
+		
+		
+		// find variability-aware modules;
+		findVariabilityAwareModules();
+		
+		// initial the reference set
+		initialRefernces();
 		
 		
 		// do the clustering task
@@ -85,11 +90,121 @@ public class VariabilityModuleSystem {
 	
 	
 
-	private void findCommonModule(){
+	
+
+
+	/**
+	 * find variability-aware modules
+	 * 
+	 */
+	private void findVariabilityAwareModules() {
 		
 		
 	}
+
+
+
+
+
+
+
+	private void initialRefernces() {
+		
+		System.out.println("Start Initialize");
+		this.hbuilder = new HierarchicalBuilder(builder,this.aLElementFactory);
+		this.sourcetoNeighbor = hbuilder.getModuleToNeighbor();
+		
+		modulesize = indexToModule.size();
+		fixedrequired = new double[modulesize][modulesize];
+		conditionalrequired = new double[modulesize][modulesize];
+		methodref = new double[modulesize][modulesize];
+		
+		for(int i =0;i < modulesize;i++){
+			for(int j = 0;j < modulesize;j++){
+				if(i==j){
+					fixedrequired[i][j] = 1;
+					conditionalrequired[i][j] = 0;
+					methodref[i][j] = 0;
+				}else{
+					fixedrequired[i][j] = 0;
+					conditionalrequired[i][j] = 0;
+					methodref[i][j] = 0;
+				}
+			}
+		}
 	
+		
+		
+		for(Map.Entry<Integer,Module>entry:indexToModule.entrySet()){
+			// reset
+			
+			// get all modules in the iteration
+			Module md = entry.getValue();
+			
+			
+			// run these modules
+			
+				
+			int md_index = md.getIndex();
+			// get the hierarchical neighbor of this module
+			HierarchicalNeighbor md_neigbhor = this.sourcetoNeighbor.get(md);
+				
+			// get all fixed required
+			Set<Module> md_fixedrequired = md_neigbhor.getfixedRequired();
+				
+			
+			for(Module md_fix:md_fixedrequired){
+				if(md!=md_fix){
+					int md_fix_index = md_fix.getIndex();
+					fixedrequired[md_index][md_fix_index]=+1;
+				}
+			}
+				
+			Set<Module> md_methodrequired = md_neigbhor.getmethodRefence();
+			for(Module md_fix:md_methodrequired){
+				if(md!=md_fix){
+					int md_fix_index = md_fix.getIndex();
+					methodref[md_index][md_fix_index]=+1;
+				}
+			}
+			
+				
+			// just check module starts from this iteratively
+			Set<ConfigurationOption> options = md.getAllConfigurationOptions();
+			if(options.isEmpty())
+				continue;
+				
+			// add modules under all options
+			for(ConfigurationOption op:options){
+				ConfigurationCondition confcond = op.getConfigurationCondition();
+				Set<Module> alloptionalmds = confcond.getAllAffectedModule();
+				if(alloptionalmds.isEmpty())
+						continue;
+			
+				for(Module optionalmd:alloptionalmds){
+					int md_optional_index = optionalmd.getIndex();
+					conditionalrequired[md_index][md_optional_index]=+1;
+				}
+			}
+				
+				
+			
+			
+		}
+		System.out.println("Finish Initialize");
+	}
+
+
+
+	private void printCommonModules() {
+		System.out.println("------Following modules are common modules--------");
+		for(Module md:commonmodules){
+			System.out.println(md.getDisplayName());
+		}
+		System.out.println("-------------------------------------------------");
+		
+	}
+
 
 	/**
 	 * normalize the reference 
@@ -181,7 +296,52 @@ public class VariabilityModuleSystem {
 	      } 
 	    } 
 	    return minValue; 
-	  } 
+	} 
+	  
+	private void findCommonModule(){
+		Queue<LElement> methodtoProcess = new LinkedList<LElement>();
+		methodtoProcess.add(mainmethod);
+		
+		assert mainmethod!=null;
+		
+		// reserve a list for visited lelement
+		Set<LElement> visisted_lelement = new HashSet<LElement>();
+		
+		while(!methodtoProcess.isEmpty()){
+			LElement head = methodtoProcess.poll();
+			visisted_lelement.add(head);
+			CompilationUnit compilunit_head = head.getCompilationUnit();
+			LElement compilunit_element = aLElementFactory.getElement(compilunit_head);
+			Module head_module = builder.getModuleByLElement(compilunit_element);
+			
+			// add the head module into common modules
+			if(!this.commonmodules.contains(head_module)){
+				this.commonmodules.add(head_module);
+			}
+			assert head_module!=null;
+			Map<LElement,Set<LElement>> hardmethodinvocation = head_module.getHardMethodInvocation();
+			Map<LElement, Set<Module>> hardtyperef = head_module.getHardReferencebyMethod();
+			if(hardtyperef.containsKey(head)){
+				Set<Module> requiredmodules = hardtyperef.get(head);
+				if(requiredmodules!=null){
+					this.commonmodules.addAll(requiredmodules);
+				}
+			}
+			if(hardmethodinvocation.containsKey(head)){
+				Set<LElement> methodinvoked = hardmethodinvocation.get(head);
+				for(LElement method:methodinvoked){
+					if(!visisted_lelement.contains(method))
+						methodtoProcess.add(method);
+				}
+			}
+		}
+		
+		// print a statistic 
+		System.out.println(this.commonmodules.size()+"\t common modules are found from\t"+this.indexToModule.size()+"\t modules[persentage:"+100*(double)this.commonmodules.size()/this.indexToModule.size()+"]");
+	}
+	
+
+	
 
 	/**
 	 * build the topic modelling
@@ -192,101 +352,7 @@ public class VariabilityModuleSystem {
 		dtItemMap = corpus.getModuleToDocTopic();
 	}
 
-	/**
-	 * 
-	 */
-	private void initModuleReference() {
-		// reset
-		
-		
-		modulesize = indexToModule.size();
-		fixedrequired = new double[modulesize][modulesize];
-		conditionalrequired = new double[modulesize][modulesize];
-		methodref = new double[modulesize][modulesize];
-		
-		for(int i =0;i < modulesize;i++){
-			for(int j = 0;j < modulesize;j++){
-				if(i==j){
-					fixedrequired[i][j] = 1;
-					conditionalrequired[i][j] = 0;
-					methodref[i][j] = 0;
-				}else{
-					fixedrequired[i][j] = 0;
-					conditionalrequired[i][j] = 0;
-					methodref[i][j] = 0;
-				}
-			}
-		}
 	
-		// initial full set mapping
-		for(Map.Entry<Integer, Module>entry:indexToModule.entrySet()){
-			int index = entry.getKey();
-			Module module = entry.getValue();
-			Set<Module> module_set = new HashSet<Module>();
-			module_set.add(module);
-		}
-		
-		
-		for(Map.Entry<Integer,Module>entry:indexToModule.entrySet()){
-			// reset
-			
-			
-			
-			
-			// get all modules in the iteration
-			Module md = entry.getValue();
-			
-			
-			// run these modules
-			
-				
-			int md_index = md.getIndex();
-			// get the hierarchical neighbor of this module
-			HierarchicalNeighbor md_neigbhor = this.sourcetoNeighbor.get(md);
-				
-			// get all fixed required
-			Set<Module> md_fixedrequired = md_neigbhor.getfixedRequired();
-				
-			
-			for(Module md_fix:md_fixedrequired){
-				if(md!=md_fix){
-					int md_fix_index = md_fix.getIndex();
-					fixedrequired[md_index][md_fix_index]=+1;
-				}
-			}
-				
-			Set<Module> md_methodrequired = md_neigbhor.getmethodRefence();
-			for(Module md_fix:md_methodrequired){
-				if(md!=md_fix){
-					int md_fix_index = md_fix.getIndex();
-					methodref[md_index][md_fix_index]=+1;
-				}
-			}
-			
-				
-			// just check module starts from this iteratively
-			Set<ConfigurationOption> options = md.getAllConfigurationOptions();
-			if(options.isEmpty())
-				continue;
-				
-			// add modules under all options
-			for(ConfigurationOption op:options){
-				ConfigurationCondition confcond = op.getConfigurationCondition();
-				Set<Module> alloptionalmds = confcond.getAllAffectedModule();
-				if(alloptionalmds.isEmpty())
-						continue;
-			
-				for(Module optionalmd:alloptionalmds){
-					int md_optional_index = optionalmd.getIndex();
-					conditionalrequired[md_index][md_optional_index]=+1;
-				}
-			}
-				
-				
-			
-			
-		}
-	}
 	
 	
 	public void performClustering(){
@@ -295,11 +361,16 @@ public class VariabilityModuleSystem {
 		stopwatch.start();
 		// do clustering
 		
-////////******************************RUN****************************////////
-		// hierarchial clustering
+		/*
+		 *  THE FIRST step should be remove all common modules from waiting
+		 *  to be clusterred set
+		 */
 		
 ////////******************************RUN****************************////////
-
+		
+		
+//////////***************************************************************/////////
+		
 		stopwatch.stop();
 
 		// Statistics
@@ -327,7 +398,6 @@ public class VariabilityModuleSystem {
 		clusterres.remove(merge_targetclusterid);
 		
 	}
-
 
 
 	private double computedistance(Set<Module> cluster,Set<Module>othercluster){
@@ -361,24 +431,21 @@ public class VariabilityModuleSystem {
 			double [] target_method_vector = methodref[targetindex];
 			//double distance_typelinkconstrain = VectorDistance.generalizedjaccardDistance(source_fix_vector, target_fix_vector);
 			//double distance_conditionalreference = VectorDistance.generalizedjaccardDistance(source_cond_vector, target_cond_vector);
-			double distance_typelinkconstrain = Maths.jensenShannonDivergence(source_fix_vector, target_fix_vector);
-			//System.out.println("typelink distance1:"+distance_typelinkconstrain);
-			double distance_conditionalreference = Maths.jensenShannonDivergence(source_cond_vector, target_cond_vector);
-			//System.out.println("conditional reference distance2:"+distance_conditionalreference);
-			double distance_topic = TopicUtil.jsDivergence(moduledoc, mddoc);
-			//System.out.println("topic distance2:"+distance_topic);
-			double distance_method = Maths.jensenShannonDivergence(source_method_vector, target_method_vector);
+			double distance_typelinkconstrain = MathUtil.cosineSimilarity(source_fix_vector, target_fix_vector);
+			System.out.println("typelink distance1:"+distance_typelinkconstrain);
+			double distance_conditionalreference = MathUtil.cosineSimilarity(source_cond_vector, target_cond_vector);
+			System.out.println("conditional reference distance2:"+distance_conditionalreference);
+			double distance_topic = TopicUtil.cosineSimilarity(moduledoc, mddoc);
+			System.out.println("topic distance2:"+distance_topic);
+			double distance_method =MathUtil.cosineSimilarity(source_method_vector, target_method_vector);
 			double overalldis = distance_typelinkconstrain+distance_method-distance_typelinkconstrain*distance_method;
 			overalldis = overalldis+distance_topic-distance_topic*overalldis;
 			overalldis = overalldis+distance_conditionalreference-distance_conditionalreference*overalldis;
-			//double overalldis = 0.3*distance_typelinkconstrain+0.3*distance_method+0.2*distance_conditionalreference+0.2*distance_topic;
 			maxdistance+=overalldis;
 		}
 		return maxdistance/cluster.size();
 	}
-
-
-
+	
 	public void setselectedmodule(Module selected) {
 		// TODO Auto-generated method stub
 		mainModule = selected;

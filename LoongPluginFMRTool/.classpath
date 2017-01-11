@@ -55,5 +55,6 @@
 	<classpathentry kind="lib" path="jdom-2.0.6-sources.jar"/>
 	<classpathentry kind="lib" path="aopalliance-repackaged-2.5.0-b30.jar"/>
 	<classpathentry kind="lib" path="validation-api-1.1.0.Final.jar"/>
+	<classpathentry kind="lib" path="Jama-1.0.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

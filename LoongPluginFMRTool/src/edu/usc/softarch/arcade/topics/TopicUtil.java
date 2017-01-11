@@ -43,6 +43,7 @@ import edu.usc.softarch.arcade.config.Config.Language;
 import edu.usc.softarch.arcade.util.DebugUtil;
 import edu.usc.softarch.arcade.util.FileListing;
 import edu.usc.softarch.arcade.util.FileUtil;
+import loongpluginfmrtool.util.MathUtil;
 
 
 /**
@@ -659,6 +660,57 @@ public class TopicUtil {
 			System.out.println("In c: set cluster:"+c.getName()+"\t 's docTopicItem:"+c.docTopicItem.toString());
 		}
 		
+	}
+
+	public static double cosineSimilarity(DocTopicItem pDocTopicItem, DocTopicItem qDocTopicItem) {
+		// TODO Auto-generated method stub
+		//return 0;
+				double divergence = 0;
+				boolean localDebug = false;
+				
+				if (pDocTopicItem.topics.size() != qDocTopicItem.topics.size()) {
+					System.err.println("P size: " + pDocTopicItem.topics.size());
+					System.err.println("Q size: " + qDocTopicItem.topics.size());
+					System.err.println("P and Q for Jensen Shannon Divergence not the same size...exiting");
+					System.exit(0);
+				}
+				
+				double[] sortedP = new double[pDocTopicItem.topics.size()];
+				double[] sortedQ = new double[qDocTopicItem.topics.size()];
+				
+				
+				for (TopicItem pTopicItem : pDocTopicItem.topics) {
+					sortedP[pTopicItem.topicNum] = pTopicItem.proportion;
+				}
+				
+				for (TopicItem qTopicItem : qDocTopicItem.topics) {
+					sortedQ[qTopicItem.topicNum] = qTopicItem.proportion;
+				}
+
+				
+				//divergence = jsDivergence(sortedP, sortedQ);
+				divergence = MathUtil.cosineSimilarity(sortedP, sortedQ);
+				//divergence = 0;
+				
+				if (localDebug) {
+					System.out.println("P distribution values: ");
+					for (int i = 0; i < sortedP.length; i++) {
+						System.out.format("%.3f,", sortedP[i]);
+					}
+					System.out.println("\n");
+
+					System.out.println("Q distribution values: ");
+					for (int i = 0; i < sortedQ.length; i++) {
+						System.out.format("%.3f,", sortedQ[i]);
+					}
+					System.out.println("\n");
+
+					System.out.println("Jensen Shannon Divergence: " + divergence);
+					System.out.println("Symmetric Kullback Leibler Divergence: "
+							+ symmKLDivergence(pDocTopicItem, qDocTopicItem));
+				}
+				
+				return divergence;
 	}
 
 }

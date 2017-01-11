@@ -202,6 +202,9 @@ public class ModuleBuilder {
 			return null;
 	}
 	
+	public  Map<LElement,Module> getModuleByLElementMapping(){
+		return elementToModule;
+	}
 	
 	public Map<Integer, Module> getIndexToModule() {
 		return indexToModule;
@@ -218,6 +221,10 @@ public class ModuleBuilder {
 	
 	public IProject getsubjectProject() {
 		return targetProject;
+	}
+	public LFlyweightElementFactory getLElementFactory() {
+		// TODO Auto-generated method stub
+		return LElementFactory;
 	}
 	
 	
