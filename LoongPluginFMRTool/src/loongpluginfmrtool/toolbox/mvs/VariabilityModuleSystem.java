@@ -5,13 +5,11 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import cc.mallet.util.Maths;
 import edu.usc.softarch.arcade.topics.DocTopicItem;
 import edu.usc.softarch.arcade.topics.TopicUtil;
 import edu.usc.softarch.arcade.util.StopWatch;
 import loongplugin.source.database.model.LElement;
 import loongplugin.source.database.model.LFlyweightElementFactory;
-import loongpluginfmrtool.module.model.configuration.ConfigurationCondition;
 import loongpluginfmrtool.module.model.configuration.ConfigurationOption;
 import loongpluginfmrtool.module.model.hierarchicalstructure.HierarchicalBuilder;
 import loongpluginfmrtool.module.model.hierarchicalstructure.HierarchicalNeighbor;
@@ -19,15 +17,16 @@ import loongpluginfmrtool.module.model.module.Module;
 import loongpluginfmrtool.module.model.module.ModuleBuilder;
 import loongpluginfmrtool.util.ClusteringResultRSFOutput;
 import loongpluginfmrtool.util.MathUtil;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 public class VariabilityModuleSystem {
 	
 	private ModuleBuilder builder;
-	private int cluster;
-	private Map<Integer,Set<Module>> clusterres;
+	private int optional_cluster;
+	private int common_cluster;
+	private Map<Integer,Set<Module>> commonclusterres;
+	private Map<Integer,Set<Module>> optionalclusterres;
 	private Map<Integer, Module> indexToModule;
 	private Map<Module,Integer> module_clusterIndex = new HashMap<Module,Integer>();
 	private Module mainModule;
@@ -37,15 +36,13 @@ public class VariabilityModuleSystem {
 	private Corpus corpus;
 	private LFlyweightElementFactory aLElementFactory;
 	private Set<Module> commonmodules = new HashSet<Module>();
+	private Set<Module> optionalmodules = new HashSet<Module>();
 	private Map<Module,DocTopicItem> dtItemMap;
 	private boolean debug = true;
 	private HierarchicalBuilder hbuilder;
 	private Map<Module,HierarchicalNeighbor> sourcetoNeighbor;
-	private ConfigurationOptionTree tree;
-	private double[][] fixedrequired;
-	private double[][] conditionalrequired;
+	private double[][] typecheckref;
 	private double[][] methodref;
-	private int commonClusterIndex = -1;
 	/**
 	 * jensenShannonDivergence get distance
 	 * 
@@ -55,12 +52,15 @@ public class VariabilityModuleSystem {
 	
 	
 	
-	public VariabilityModuleSystem(ModuleBuilder pbuilder,int pcluster,Module entrancemodule,LElement method){
-		
-		this.cluster = pcluster;
+	public VariabilityModuleSystem(ModuleBuilder pbuilder,int pcommoncluster,int poptionalcluster,Module entrancemodule,LElement method){
+		this.common_cluster = pcommoncluster;
+		this.optional_cluster = poptionalcluster;
 		this.builder = pbuilder;
 		this.indexToModule = builder.getIndexToModule();
-		this.clusterres = new HashMap<Integer,Set<Module>>();
+		
+		this.optionalclusterres = new HashMap<Integer,Set<Module>>();
+		this.commonclusterres = new HashMap<Integer,Set<Module>>();
+		
 		this.aProject = this.builder.getsubjectProject();
 		this.aLElementFactory = builder.getLElementFactory();
 		this.mainmethod = method;
@@ -73,13 +73,16 @@ public class VariabilityModuleSystem {
 		if(debug)
 			printCommonModules();
 		
-		
-		// find variability-aware modules;
-		findVariabilityAwareModules();
+		// create the profile for optional module set;
+		createProfileOptional();
 		
 		// initial the reference set
 		initialRefernces();
+		normalizeReference();
 		
+		
+		// initial index to cluster
+		clusterIndexInitialize();
 		
 		// do the clustering task
 		performClustering();
@@ -88,22 +91,41 @@ public class VariabilityModuleSystem {
 		ClusteringResultRSFOutput.ModuledRSFOutput(clusterres,"vms",builder.getsubjectProject());
 	}
 	
-	
 
 	
 
-
-	/**
-	 * find variability-aware modules
-	 * 
-	 */
-	private void findVariabilityAwareModules() {
+	private void clusterIndexInitialize() {
+		// run through the full list of index to module
+		for(Map.Entry<Integer, Module>entry:indexToModule.entrySet()){
+			int id = entry.getKey();
+			Module module = entry.getValue();
+			Set<Module> moduleset = new HashSet<Module>();
+			moduleset.add(module);
+			
+			//module_clusterIndex
+			module_clusterIndex.put(module, id);
+			
+			// clusterres
+			if(this.commonmodules.contains(module)){
+				// add to the common set
+				this.commonclusterres.put(id, moduleset);
+				
+			}else if(this.optionalmodules.contains(module)){
+				// add to the optional set
+				this.optionalclusterres.put(id, moduleset);
+				
+			}else{
+				try {
+					throw new Exception("a module has not been considerred as optional or a common");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		
+		}
 		
 	}
-
-
-
 
 
 
@@ -115,19 +137,16 @@ public class VariabilityModuleSystem {
 		this.sourcetoNeighbor = hbuilder.getModuleToNeighbor();
 		
 		modulesize = indexToModule.size();
-		fixedrequired = new double[modulesize][modulesize];
-		conditionalrequired = new double[modulesize][modulesize];
+		typecheckref = new double[modulesize][modulesize];
 		methodref = new double[modulesize][modulesize];
 		
 		for(int i =0;i < modulesize;i++){
 			for(int j = 0;j < modulesize;j++){
 				if(i==j){
-					fixedrequired[i][j] = 1;
-					conditionalrequired[i][j] = 0;
+					typecheckref[i][j] = 1;
 					methodref[i][j] = 0;
 				}else{
-					fixedrequired[i][j] = 0;
-					conditionalrequired[i][j] = 0;
+					typecheckref[i][j] = 0;
 					methodref[i][j] = 0;
 				}
 			}
@@ -149,18 +168,18 @@ public class VariabilityModuleSystem {
 			// get the hierarchical neighbor of this module
 			HierarchicalNeighbor md_neigbhor = this.sourcetoNeighbor.get(md);
 				
-			// get all fixed required
-			Set<Module> md_fixedrequired = md_neigbhor.getfixedRequired();
+			// get all type reference modules
+			Set<Module> md_typemodulerequired = md_neigbhor.getTypeModuleRequired();
 				
 			
-			for(Module md_fix:md_fixedrequired){
-				if(md!=md_fix){
-					int md_fix_index = md_fix.getIndex();
-					fixedrequired[md_index][md_fix_index]=+1;
+			for(Module md_type:md_typemodulerequired){
+				if(md!=md_type){
+					int md_fix_index = md_type.getIndex();
+					typecheckref[md_index][md_fix_index]=+1;
 				}
 			}
 				
-			Set<Module> md_methodrequired = md_neigbhor.getmethodRefence();
+			Set<Module> md_methodrequired = md_neigbhor.getMethodRefence();
 			for(Module md_fix:md_methodrequired){
 				if(md!=md_fix){
 					int md_fix_index = md_fix.getIndex();
@@ -173,22 +192,6 @@ public class VariabilityModuleSystem {
 			Set<ConfigurationOption> options = md.getAllConfigurationOptions();
 			if(options.isEmpty())
 				continue;
-				
-			// add modules under all options
-			for(ConfigurationOption op:options){
-				ConfigurationCondition confcond = op.getConfigurationCondition();
-				Set<Module> alloptionalmds = confcond.getAllAffectedModule();
-				if(alloptionalmds.isEmpty())
-						continue;
-			
-				for(Module optionalmd:alloptionalmds){
-					int md_optional_index = optionalmd.getIndex();
-					conditionalrequired[md_index][md_optional_index]=+1;
-				}
-			}
-				
-				
-			
 			
 		}
 		System.out.println("Finish Initialize");
@@ -214,20 +217,16 @@ public class VariabilityModuleSystem {
 		 * private double[][] fixedrequired;
 			private double[][] conditionalrequired;
 		 */
-		double[][] fixedrequirednormalized = new double[fixedrequired.length][fixedrequired.length];
-		double[][] conditionalrequirednormalized = new double [fixedrequired.length][fixedrequired.length];
-		double[][] methodrefnormalized = new double[fixedrequired.length][fixedrequired.length];
-		for(int i = 0;i < fixedrequired.length;i++){
-			double maxfixline = getMax(fixedrequired[i]);
-			double minfixline = getMin(fixedrequired[i]);
-			
-			double maxcondline = getMax(conditionalrequired[i]);
-			double mincondline = getMin(conditionalrequired[i]);
+		double[][] fixedrequirednormalized = new double[typecheckref.length][typecheckref.length];
+		double[][] methodrefnormalized = new double[typecheckref.length][typecheckref.length];
+		for(int i = 0;i < typecheckref.length;i++){
+			double maxfixline = getMax(typecheckref[i]);
+			double minfixline = getMin(typecheckref[i]);
 			
 			double maxmethodrefline = getMax(methodref[i]);
 			double minmethodrefline = getMin(methodref[i]);
 			
-			for(int j = 0; j < fixedrequired.length;j++){
+			for(int j = 0; j < typecheckref.length;j++){
 				if(maxfixline==minfixline){
 					if(maxfixline>1){
 						fixedrequirednormalized[i][j] = 1;
@@ -236,22 +235,10 @@ public class VariabilityModuleSystem {
 					}
 					
 				}else{
-					fixedrequirednormalized[i][j] = (fixedrequired[i][j]-minfixline)/(maxfixline-minfixline);
+					fixedrequirednormalized[i][j] = (typecheckref[i][j]-minfixline)/(maxfixline-minfixline);
 				}
 				
 				
-				// conditional 
-				
-				if(maxcondline==mincondline){
-					if(maxcondline>1){
-						conditionalrequirednormalized[i][j] = 1;
-					}else{
-						conditionalrequirednormalized[i][j] = 0;
-					}
-					
-				}else{
-					conditionalrequirednormalized[i][j] = (conditionalrequired[i][j]-mincondline)/(maxcondline-mincondline);
-				}
 				
 				// mehtod ref
 				
@@ -270,8 +257,7 @@ public class VariabilityModuleSystem {
 			
 		}
 		
-		fixedrequired = fixedrequirednormalized;
-		conditionalrequired = conditionalrequirednormalized;
+		typecheckref = fixedrequirednormalized;
 		methodref = methodrefnormalized;
 	}
 	
@@ -353,20 +339,53 @@ public class VariabilityModuleSystem {
 	}
 
 	
-	
+	public void createProfileOptional(){
+		// create set for optional set
+		//optionalmodules;
+		// A- B
+		Set<Module> allmodules = new HashSet<Module>(indexToModule.values());
+		for(Module md:allmodules){
+			if(!this.commonmodules.contains(md)){
+				optionalmodules.add(md);
+			}
+		}
+		
+		
+	}
 	
 	public void performClustering(){
+		
+		
 		StopWatch stopwatch = new StopWatch();
 		
 		stopwatch.start();
-		// do clustering
-		
-		/*
-		 *  THE FIRST step should be remove all common modules from waiting
-		 *  to be clusterred set
+			
+////////******************************RUN****************************////////
+		/**
+		 * Do the clustering on common set
 		 */
 		
-////////******************************RUN****************************////////
+		while(this.commonclusterres.size()>this.common_cluster){
+			
+			
+		}
+		
+		/**
+		 * Do the clustering on optional set
+		 */
+		
+		while(this.optionalclusterres.size()>this.optional_cluster){
+			
+			
+		}
+		
+		
+		
+		/**
+		 * Merge and resolve dependency
+		 */
+		
+		
 		
 		
 //////////***************************************************************/////////
@@ -387,63 +406,122 @@ public class VariabilityModuleSystem {
 	
 	
 	
-	private void mergecluster(int merge_sourceclusterid, int merge_targetclusterid) {
-		Set<Module> clustersource = clusterres.get(merge_sourceclusterid);
-		Set<Module> clustertarget = clusterres.get(merge_targetclusterid);
+	private void mergecommoncluster(int merge_sourceclusterid, int merge_targetclusterid) {
+		assert this.commonclusterres.containsKey(merge_sourceclusterid);
+		assert this.commonclusterres.containsKey(merge_targetclusterid);
+		Set<Module> clustersource = this.commonclusterres.get(merge_sourceclusterid);
+		Set<Module> clustertarget = this.commonclusterres.get(merge_targetclusterid);
 		for(Module md:clustertarget){
 			clustersource.add(md);
 			module_clusterIndex.put(md, merge_sourceclusterid);
 		}
-		clusterres.put(merge_sourceclusterid, clustersource);
-		clusterres.remove(merge_targetclusterid);
+		this.commonclusterres.put(merge_sourceclusterid, clustersource);
+		this.commonclusterres.remove(merge_targetclusterid);
+		
+	}
+	
+	private void mergeoptionalcluster(int merge_sourceclusterid, int merge_targetclusterid){
+		assert this.optionalclusterres.containsKey(merge_sourceclusterid);
+		assert this.optionalclusterres.containsKey(merge_targetclusterid);
+		Set<Module> clustersource = this.optionalclusterres.get(merge_sourceclusterid);
+		Set<Module> clustertarget = this.optionalclusterres.get(merge_targetclusterid);
+		for(Module md:clustertarget){
+			clustersource.add(md);
+			module_clusterIndex.put(md, merge_sourceclusterid);
+		}
+		this.optionalclusterres.put(merge_sourceclusterid, clustersource);
+		this.optionalclusterres.remove(merge_targetclusterid);
 		
 	}
 
 
 	private double computedistance(Set<Module> cluster,Set<Module>othercluster){
 		// complete-linkage agglomerative algorithm
-		double averagedisance = -1;
+		double averagedisance = 0.0;
 		for(Module md:cluster){
 			double mddistance = getAverage(md,othercluster);
-			if(mddistance>averagedisance){
-				averagedisance = mddistance;
-			}
+			averagedisance += mddistance;
 		}
+		averagedisance = averagedisance/cluster.size();
 		return averagedisance;
 	}
 	
+	
 	private double getAverage(Module module, Set<Module> cluster){
-		double maxdistance = 0.0;
+		
+		double methodref_moduletocluster_count = 0;// targets(m) N f
+		double methodref_clustertomodule_count = 0;// sources(m) N f
+		double typeref_moduletocluster_count = 0;
+		double typeref_clustertomodule_count = 0;
+		double targetm = 0;// targets(m)
+		double sourcesm = 0;// sources(m)
+		double totaltopic_sim = 0;
 		assert this.dtItemMap.containsKey(module);
 		DocTopicItem moduledoc = this.dtItemMap.get(module);
 		int sourceindex = module.getIndex();
-		double [] source_fix_vector = fixedrequired[sourceindex];
-		double [] source_cond_vector = conditionalrequired[sourceindex];
+		double [] source_typeref_vector = typecheckref[sourceindex];
 		double [] source_method_vector = methodref[sourceindex];
+		
+		double overalldistance = 0.0;
+		
+		// compute targets(m)
+		for(int i =0 ;i < source_typeref_vector.length;i++){
+			targetm += source_method_vector[i];
+		}
+		
+		// compute sources(m)
+		/*
+		 *这里要获取 m 那一列的和 
+		 */
+		for(int i = 0;i < methodref.length;i++){
+			sourcesm += methodref[i][sourceindex];
+		}
+		
+		
+		
 		for(Module md:cluster){
 			if(md==module)
 				continue;
 			int targetindex = md.getIndex();
 			assert this.dtItemMap.containsKey(md);
 			DocTopicItem mddoc = this.dtItemMap.get(md);
-			double [] target_fix_vector = fixedrequired[targetindex];
-			double [] target_cond_vector = conditionalrequired[targetindex];
+			double [] target_typeref_vector = typecheckref[targetindex];
 			double [] target_method_vector = methodref[targetindex];
-			//double distance_typelinkconstrain = VectorDistance.generalizedjaccardDistance(source_fix_vector, target_fix_vector);
-			//double distance_conditionalreference = VectorDistance.generalizedjaccardDistance(source_cond_vector, target_cond_vector);
-			double distance_typelinkconstrain = MathUtil.cosineSimilarity(source_fix_vector, target_fix_vector);
-			System.out.println("typelink distance1:"+distance_typelinkconstrain);
-			double distance_conditionalreference = MathUtil.cosineSimilarity(source_cond_vector, target_cond_vector);
-			System.out.println("conditional reference distance2:"+distance_conditionalreference);
-			double distance_topic = TopicUtil.cosineSimilarity(moduledoc, mddoc);
-			System.out.println("topic distance2:"+distance_topic);
-			double distance_method =MathUtil.cosineSimilarity(source_method_vector, target_method_vector);
-			double overalldis = distance_typelinkconstrain+distance_method-distance_typelinkconstrain*distance_method;
-			overalldis = overalldis+distance_topic-distance_topic*overalldis;
-			overalldis = overalldis+distance_conditionalreference-distance_conditionalreference*overalldis;
-			maxdistance+=overalldis;
+			
+			// topology analysis
+			if(target_method_vector[sourceindex]!=0){
+				methodref_clustertomodule_count+=target_method_vector[sourceindex];
+			}
+			if(source_method_vector[targetindex]!=0){// from m to cluster
+				methodref_moduletocluster_count+=source_method_vector[targetindex];
+			}
+			
+			// type reference
+			if(target_typeref_vector[sourceindex]!=0){
+				typeref_clustertomodule_count+=target_typeref_vector[sourceindex];
+			}
+			
+			if(source_typeref_vector[targetindex]!=0){
+				typeref_moduletocluster_count+=source_typeref_vector[targetindex];
+			}
+			
+			// topic laten dirichlet allocation
+			double distance_method = MathUtil.cosineSimilarity(source_method_vector, target_method_vector);
+			totaltopic_sim+=distance_method;
+			
 		}
-		return maxdistance/cluster.size();
+		
+		// average totaltopic_sim
+		double avg_totaltopic_sim = totaltopic_sim/cluster.size();
+		// average  reference method
+		double avg_refercen_sim = (1+methodref_moduletocluster_count)/targetm * methodref_clustertomodule_count/sourcesm;
+		// average type reference sim
+		double avg_typeref_sim = (typeref_clustertomodule_count+typeref_moduletocluster_count)/2*cluster.size();
+		
+		double partialresult = avg_totaltopic_sim+avg_refercen_sim-avg_totaltopic_sim*avg_refercen_sim;
+		overalldistance = partialresult+avg_typeref_sim-partialresult*avg_typeref_sim;
+		
+		return overalldistance;
 	}
 	
 	public void setselectedmodule(Module selected) {

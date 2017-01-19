@@ -11,7 +11,7 @@ import loongpluginfmrtool.module.model.module.Module;
 public class HierarchicalNeighbor {
 	private Module asource;
 	private Map<ConfigurationCondition,Set<Module>> condition_targetmodule = new HashMap<ConfigurationCondition,Set<Module>>();
-	private Set<Module> fixedrequired = new HashSet<Module>();
+	private Set<Module> typerequired = new HashSet<Module>();
 	private Set<Module> methodreference = new HashSet<Module>();
 	public HierarchicalNeighbor(Module psource){
 		this.asource = psource;
@@ -35,22 +35,22 @@ public class HierarchicalNeighbor {
 	}
 	
 	/**
-	 * add fix module to this module
+	 * add type required to this module
 	 * @return
 	 */
-	public void addNeighbor(Module module){
-		fixedrequired.add(module);
+	public void addTypeRef(Module module){
+		typerequired.add(module);
 	}
 	
 	public void addMethodRef(Module module){
 		methodreference.add(module);
 	}
 	
-	public Set<Module> getfixedRequired(){
-		return this.fixedrequired;
+	public Set<Module> getTypeModuleRequired(){
+		return this.typerequired;
 	}
 	
-	public Set<Module> getmethodRefence(){
+	public Set<Module> getMethodRefence(){
 		return this.methodreference;
 	}
 	
@@ -66,12 +66,5 @@ public class HierarchicalNeighbor {
 		}
 		
 		return mds;
-	}
-
-	public void removeConditionNeighbor(Module targetmodule) {
-		// TODO Auto-generated method stub
-		if(fixedrequired.contains(targetmodule)){
-			fixedrequired.remove(targetmodule);
-		}
 	}
 }

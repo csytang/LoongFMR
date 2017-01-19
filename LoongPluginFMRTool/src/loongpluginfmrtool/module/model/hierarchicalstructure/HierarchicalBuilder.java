@@ -117,7 +117,7 @@ public class HierarchicalBuilder {
 					}
 				}
 				if(targetmodule.getIndex()!=module.getIndex()){
-					neighbor.addNeighbor(targetmodule);
+					neighbor.addTypeRef(targetmodule);
 					
 				}
 			}
@@ -143,35 +143,6 @@ public class HierarchicalBuilder {
 					neighbor.addMethodRef(targetmodule);
 				}
 			}
-			
-			
-			
-			
-			
-			// linker and conditional constraints
-			LinkerAndConditionalConstrains linkercondconstrains = module.getLinkerAndConditionalConstrains();
-			Map<ConfigurationCondition,Set<LElement>> rawenabledconstrains = linkercondconstrains.getRawEnableConstrains();
-			for(Map.Entry<ConfigurationCondition, Set<LElement>>enableentry:rawenabledconstrains.entrySet()){
-				ConfigurationCondition config = enableentry.getKey();
-				Set<LElement> elements = enableentry.getValue();
-				// run all elements
-				for(LElement element:elements){
-					CompilationUnit unit = element.getCompilationUnit();
-					LElement compelement = this.alElementfactory.getElement(unit);
-					Module targetmodule = abuilder.getModuleByLElement(compelement);
-					// if it is not the source module
-					if(targetmodule.getIndex()!=module.getIndex()){
-						neighbor.addNeighbor(config, targetmodule);
-						if(!parentModules.contains(module))
-							parentModules.add(module);
-						neighbor.removeConditionNeighbor(targetmodule);
-					}
-				}
-			}
-			
-			
-			
-			
 			
 			// 3. link the source to neighbor
 			this.sourcetoNeighbor.put(module, neighbor);
@@ -222,7 +193,7 @@ public class HierarchicalBuilder {
 			/************** required fixed*******************/
 			Element fixedrequired = XMLWriter.createElement("hardrequired_modules");
 			
-			Set<Module> fixedtargets = neighbor.getfixedRequired();
+			Set<Module> fixedtargets = neighbor.getTypeModuleRequired();
 			if(fixedtargets.size()!=0){
 				for(Module fixedtarget:fixedtargets){
 					Element fixelement = XMLWriter.createElement(fixedtarget.getModuleName());

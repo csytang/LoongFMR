@@ -52,10 +52,17 @@ public class Module implements Serializable {
 	private IProject aProject = null;
 	private Map<Module,Integer> module_calldependency = new HashMap<Module,Integer>();
 	
+	
+	/************external configuration options********/
+	// here lists the configuration options from others
+	private Map<ConfigurationOption,LElement> externaloption_internalelement = new HashMap<ConfigurationOption,LElement>();
+	
+	
 	/************constrains***************/
 	private LinkerAndConditionalConstrains linkcondconstains = null;
 	private TypeConstrains typeconstrains = null;
 	private MethodReference methodconstrains = null;
+	
 	
 	public Module(LElement element,int index,LFlyweightElementFactory pElementFactory,ModuleBuilder mbuilder,ModuleModel pmodel){
 		this.dominate = element;
@@ -223,18 +230,15 @@ public class Module implements Serializable {
 	}
 
 	public String getId() {
-		// TODO Auto-generated method stub
 		return moduleIndex+"";
 	}
 
 	public CompilationUnit getCompilationUnit() {
-		// TODO Auto-generated method stub
 		return this.dominate.getCompilationUnit();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		// TODO Auto-generated method stub
 		if(!(obj instanceof Module)){
 			return false;
 		}else{
@@ -248,7 +252,6 @@ public class Module implements Serializable {
 	}
 
 	public IFile getIFile() {
-		// TODO Auto-generated method stub
 		IFile file = null;
 		CompilationUnit unit = this.dominate.getCompilationUnit();
 		ICompilationUnit iunit = (ICompilationUnit) unit.getJavaElement();
@@ -259,7 +262,6 @@ public class Module implements Serializable {
 
 
 	public int getIndex() {
-		// TODO Auto-generated method stub
 		return moduleIndex;
 	}
 

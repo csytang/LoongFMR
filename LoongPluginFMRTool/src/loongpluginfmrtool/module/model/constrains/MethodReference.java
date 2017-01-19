@@ -4,10 +4,12 @@ import java.util.HashSet;
 import java.util.Set;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import loongplugin.source.database.model.LElement;
 import loongplugin.source.database.model.LFlyweightElementFactory;
 import loongpluginfmrtool.module.model.module.Module;
+import loongpluginfmrtool.util.MethodBindingFinder;
 import loongpluginfmrtool.util.TypeBindingVisitor;
 
 public class MethodReference {
@@ -34,18 +36,15 @@ public class MethodReference {
 		if(allmethods!=null){
 			for(LElement method:allmethods){
 				ASTNode methodastnode = method.getASTNode();
-				TypeBindingVisitor typebindingvisitor = new TypeBindingVisitor();
-				methodastnode.accept(typebindingvisitor);
-				Set<ITypeBinding> typebindings = typebindingvisitor.getVariableBindings();
-				if(typebindings!=null){
-					for(ITypeBinding binding:typebindings){
-						if(binding!=null){
-							LElement typeelement = alElementfactory.getElement(binding);
-							if(typeelement!=null){
-								// if the interface is  in the system
-								methods_elements.add(typeelement);
-							}
-						}
+				MethodBindingFinder finder = new MethodBindingFinder();
+				// accept a method visitor
+				methodastnode.accept(finder);
+				// get all method bindings
+				Set<IMethodBinding> methodbindings = finder.getMethodBinding();
+				for(IMethodBinding bind:methodbindings){
+					LElement element = alElementfactory.getElement(bind);
+					if(element!=null){
+						methods_elements.add(element);
 					}
 				}
 			}

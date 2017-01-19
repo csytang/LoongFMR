@@ -41,7 +41,8 @@ public class VMSConfigurationDialog extends Dialog {
 	private Text text;
 	private Shell shell;
 	private ModuleBuilder builder;
-	private int cluster;
+	private int optionalcluster;
+	private int commoncluster;
 	private Combo combo;
 	private Combo comboEntranceMethod;
 	private Map<Integer,Module> comboIndextoModule = new HashMap<Integer,Module>();
@@ -49,6 +50,7 @@ public class VMSConfigurationDialog extends Dialog {
 	private List<Module> mdset = new LinkedList<Module>();
 	private Module entranceModule;
 	private LElement entranceMethod;
+	private Text commonclustertext;
 	
 	/**
 	 * Create the dialog.
@@ -96,12 +98,26 @@ public class VMSConfigurationDialog extends Dialog {
 		
 		Label lblNewLabel = new Label(container, SWT.NONE);
 		lblNewLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-		lblNewLabel.setText("# Optional Modules Preferred");
+		lblNewLabel.setText("# Optional Feature Preferred");
 		
 		text = new Text(container, SWT.BORDER);
 		GridData gd_text = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
 		gd_text.heightHint = 20;
 		text.setLayoutData(gd_text);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		
+		Label lblcommonfeatureLabel = new Label(container, SWT.NONE);
+		lblcommonfeatureLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1));
+		lblcommonfeatureLabel.setText("#Common Features(exclude abstracts)");
+		
+		commonclustertext = new Text(container, SWT.BORDER);
+		commonclustertext.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		new Label(container, SWT.NONE);
 		new Label(container, SWT.NONE);
 		new Label(container, SWT.NONE);
@@ -116,6 +132,40 @@ public class VMSConfigurationDialog extends Dialog {
 		
 		combo = new Combo(container, SWT.NONE);
 		combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		
+		
+		
+		combo.addSelectionListener(new SelectionAdapter(){
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				int currentSelecitonIndex = combo.getSelectionIndex();
+				if(currentSelecitonIndex==-1)
+					return;
+				
+				entranceModule = comboIndextoModule.get(currentSelecitonIndex); 
+				List<LElement> allmethodsselected = new LinkedList(entranceModule.getallMethods());
+				comboEntranceMethod.removeAll();
+				comboIndextoMethod.clear();
+				
+				// run all elements
+				for(int i = 0;i < allmethodsselected.size();i++){
+					MethodDeclaration methoddecl = (MethodDeclaration)allmethodsselected.get(i).getASTNode();
+					String fullmethodName = "";
+					fullmethodName+=methoddecl.getName().toString();
+					
+					Type returntype = methoddecl.getReturnType2();
+					if(returntype!=null){
+						fullmethodName+="::";
+						fullmethodName+=returntype.toString();
+					}
+					//fullmethodName+=methoddecl.getReturnType().toString();
+					comboEntranceMethod.add(fullmethodName, i);
+					comboIndextoMethod.put(i, allmethodsselected.get(i));
+				}
+				
+			}
+		});
 		new Label(container, SWT.NONE);
 		new Label(container, SWT.NONE);
 		new Label(container, SWT.NONE);
@@ -152,40 +202,6 @@ public class VMSConfigurationDialog extends Dialog {
 		}
 		
 		
-		
-		combo.addSelectionListener(new SelectionAdapter(){
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				int currentSelecitonIndex = combo.getSelectionIndex();
-				if(currentSelecitonIndex==-1)
-					return;
-				
-				entranceModule = comboIndextoModule.get(currentSelecitonIndex); 
-				List<LElement> allmethodsselected = new LinkedList(entranceModule.getallMethods());
-				comboEntranceMethod.removeAll();
-				comboIndextoMethod.clear();
-				
-				// run all elements
-				for(int i = 0;i < allmethodsselected.size();i++){
-					MethodDeclaration methoddecl = (MethodDeclaration)allmethodsselected.get(i).getASTNode();
-					String fullmethodName = "";
-					fullmethodName+=methoddecl.getName().toString();
-					
-					Type returntype = methoddecl.getReturnType2();
-					if(returntype!=null){
-						fullmethodName+="::";
-						fullmethodName+=returntype.toString();
-					}
-					//fullmethodName+=methoddecl.getReturnType().toString();
-					comboEntranceMethod.add(fullmethodName, i);
-					comboIndextoMethod.put(i, allmethodsselected.get(i));
-				}
-				
-			}
-		});
-		
-		
 		return container;
 	}
 
@@ -207,12 +223,12 @@ public class VMSConfigurationDialog extends Dialog {
 		// TODO Auto-generated method stub
 		
 		String textcontent = text.getText();
-		
+		String commontextcontent = commonclustertext.getText();
 		try{
-			this.cluster = Integer.parseInt(textcontent);
+			this.optionalcluster = Integer.parseInt(textcontent);
+			this.commoncluster = Integer.parseInt(commontextcontent);
 			
-			
-			VariabilityModuleSystem mvs = new VariabilityModuleSystem(builder,cluster,entranceModule,entranceMethod);
+			VariabilityModuleSystem mvs = new VariabilityModuleSystem(builder,commoncluster,optionalcluster,entranceModule,entranceMethod);
 		}catch(NumberFormatException e){
 			Display.getCurrent().syncExec(new Runnable(){
 
@@ -233,7 +249,7 @@ public class VMSConfigurationDialog extends Dialog {
 	 */
 	@Override
 	protected Point getInitialSize() {
-		return new Point(491, 273);
+		return new Point(561, 324);
 	}
 
 }
