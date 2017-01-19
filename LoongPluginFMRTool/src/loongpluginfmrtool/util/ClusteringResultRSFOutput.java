@@ -74,7 +74,81 @@ public class ClusteringResultRSFOutput {
 		}
 	}
 	
-	
+	public static void ModuledRSFOutput(Map<Integer,Set<Module>>commonclusterres,Map<Integer,Set<Module>>optionalclusterres,String method,IProject sourceProject){
+		project = sourceProject;
+		String fileName = method+"_clusteringresult"+".rsf";
+		file = project.getFile(fileName); 
+		
+		
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		
+		for(Map.Entry<Integer, Set<Module>>entry:commonclusterres.entrySet()){
+			int clusterid = entry.getKey();
+			Set<Module>set = entry.getValue();
+			String fullString = "";
+			
+			for(Module module:set){
+				
+					fullString = "";
+					fullString = "contain\t";
+					fullString += clusterid+"\t";
+					fullString += module.getShortName()+".java";
+					fullString += "\n";
+					try {
+						out.write(fullString.getBytes());
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			
+		}
+		
+		for(Map.Entry<Integer, Set<Module>>entry:optionalclusterres.entrySet()){
+			int clusterid = entry.getKey();
+			Set<Module>set = entry.getValue();
+			String fullString = "";
+			
+			for(Module module:set){
+				
+					fullString = "";
+					fullString = "contain\t";
+					fullString += clusterid+"\t";
+					fullString += module.getShortName()+".java";
+					fullString += "\n";
+					try {
+						out.write(fullString.getBytes());
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			
+		}
+		
+		InputStream inputsource = new ByteArrayInputStream(out.toByteArray());
+		if(file.exists()){
+			try {
+				file.delete(true, null);
+			} catch (CoreException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	    try {
+			file.create(inputsource, EFS.NONE, null);
+		} catch (CoreException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+	    try {
+			out.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	public static void ModuledStrOutput(Map<Integer,Set<String>>pclusterres,String method,IProject sourceProject){
 		project = sourceProject;
 		String fileName = method+"_clusteringresult"+".rsf";

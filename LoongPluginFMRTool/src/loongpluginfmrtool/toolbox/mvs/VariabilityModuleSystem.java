@@ -88,7 +88,7 @@ public class VariabilityModuleSystem {
 		performClustering();
 		
 		//ClusteringResultRSFOutput output = new ClusteringResultRSFOutput(clusterres,"modulevariabilitysystem",builder.gettargetProject());
-		ClusteringResultRSFOutput.ModuledRSFOutput(clusterres,"vms",builder.getsubjectProject());
+		ClusteringResultRSFOutput.ModuledRSFOutput(commonclusterres,optionalclusterres,"vms",builder.getsubjectProject());
 	}
 	
 
@@ -366,7 +366,38 @@ public class VariabilityModuleSystem {
 		 */
 		
 		while(this.commonclusterres.size()>this.common_cluster){
-			
+			// find the one with max similarty
+			double maxsim = Double.MIN_VALUE;
+			int sourceIdToMerge = -1;
+			int targetIdToMerge = -1;
+			for(Map.Entry<Integer, Set<Module>>entry:this.commonclusterres.entrySet()){
+				//Map<Integer,Set<Module>>
+				int source_commonindex = entry.getKey();
+				Set<Module> source_commonmodules = entry.getValue();
+				for(Map.Entry<Integer, Set<Module>>entry_target:this.commonclusterres.entrySet()){
+					int target_commonindex = entry_target.getKey();
+					if(source_commonindex==target_commonindex){
+						continue;
+					}
+					Set<Module> target_commonmodules = entry.getValue();
+					double simiarity = computesimiarity(source_commonmodules,target_commonmodules);
+					if(simiarity > maxsim){
+						sourceIdToMerge = source_commonindex;
+						targetIdToMerge = target_commonindex;
+						maxsim = simiarity;
+					}
+				}
+			}
+			if(sourceIdToMerge!=-1 && targetIdToMerge!=-1){
+				mergecommoncluster(sourceIdToMerge,targetIdToMerge);
+			}else{
+				try {
+					throw new Exception("cannot find module set to merge[in common set]");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 			
 		}
 		
@@ -375,7 +406,38 @@ public class VariabilityModuleSystem {
 		 */
 		
 		while(this.optionalclusterres.size()>this.optional_cluster){
-			
+			// find the one with max similarty
+			double maxsim = Double.MIN_VALUE;
+			int sourceIdToMerge = -1;
+			int targetIdToMerge = -1;
+			for(Map.Entry<Integer, Set<Module>>entry:this.optionalclusterres.entrySet()){
+					//Map<Integer,Set<Module>>
+					int source_optionalindex = entry.getKey();
+					Set<Module> source_optionalmodules = entry.getValue();
+					for(Map.Entry<Integer, Set<Module>>entry_target:this.optionalclusterres.entrySet()){
+							int target_optionalindex = entry_target.getKey();
+							if(source_optionalindex==target_optionalindex){
+								continue;
+							}
+							Set<Module> target_optionalmodules = entry.getValue();
+							double simiarity = computesimiarity(source_optionalmodules,target_optionalmodules);
+							if(simiarity > maxsim){
+								sourceIdToMerge = source_optionalindex;
+								targetIdToMerge = target_optionalindex;
+								maxsim = simiarity;
+							}
+						}
+					}
+					if(sourceIdToMerge!=-1 && targetIdToMerge!=-1){
+						mergeoptionalcluster(sourceIdToMerge,targetIdToMerge);
+					}else{
+						try {
+							throw new Exception("cannot find module set to merge[in optional set]");
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
 			
 		}
 		
@@ -435,7 +497,7 @@ public class VariabilityModuleSystem {
 	}
 
 
-	private double computedistance(Set<Module> cluster,Set<Module>othercluster){
+	private double computesimiarity(Set<Module> cluster,Set<Module>othercluster){
 		// complete-linkage agglomerative algorithm
 		double averagedisance = 0.0;
 		for(Module md:cluster){
