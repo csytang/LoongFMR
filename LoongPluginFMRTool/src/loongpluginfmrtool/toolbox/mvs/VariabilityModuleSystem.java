@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+
+import edu.usc.softarch.arcade.clustering.SimCalcUtil;
 import edu.usc.softarch.arcade.topics.DocTopicItem;
 import edu.usc.softarch.arcade.topics.TopicUtil;
 import edu.usc.softarch.arcade.util.StopWatch;
@@ -379,7 +381,7 @@ public class VariabilityModuleSystem {
 					if(source_commonindex==target_commonindex){
 						continue;
 					}
-					Set<Module> target_commonmodules = entry.getValue();
+					Set<Module> target_commonmodules = entry_target.getValue();
 					double simiarity = computesimiarity(source_commonmodules,target_commonmodules);
 					if(simiarity > maxsim){
 						sourceIdToMerge = source_commonindex;
@@ -390,7 +392,17 @@ public class VariabilityModuleSystem {
 			}
 			if(sourceIdToMerge!=-1 && targetIdToMerge!=-1){
 				mergecommoncluster(sourceIdToMerge,targetIdToMerge);
+				System.out.println("current size:"+this.commonclusterres.size());
+				System.out.println("\n current ids:");
+				String idlist = "[";
+				for(Map.Entry<Integer, Set<Module>>entry:this.commonclusterres.entrySet()){
+					idlist = idlist+entry.getKey();
+					idlist = idlist+",";
+				}
+				idlist += "]";
+				System.out.println(idlist);
 			}else{
+				System.out.println("merge:"+sourceIdToMerge+"\tand\t"+targetIdToMerge);
 				try {
 					throw new Exception("cannot find module set to merge[in common set]");
 				} catch (Exception e) {
@@ -419,7 +431,7 @@ public class VariabilityModuleSystem {
 							if(source_optionalindex==target_optionalindex){
 								continue;
 							}
-							Set<Module> target_optionalmodules = entry.getValue();
+							Set<Module> target_optionalmodules = entry_target.getValue();
 							double simiarity = computesimiarity(source_optionalmodules,target_optionalmodules);
 							if(simiarity > maxsim){
 								sourceIdToMerge = source_optionalindex;
@@ -471,6 +483,7 @@ public class VariabilityModuleSystem {
 	private void mergecommoncluster(int merge_sourceclusterid, int merge_targetclusterid) {
 		assert this.commonclusterres.containsKey(merge_sourceclusterid);
 		assert this.commonclusterres.containsKey(merge_targetclusterid);
+		System.out.println("[common:] merge: \t"+merge_sourceclusterid+"\t and \t"+merge_targetclusterid);
 		Set<Module> clustersource = this.commonclusterres.get(merge_sourceclusterid);
 		Set<Module> clustertarget = this.commonclusterres.get(merge_targetclusterid);
 		for(Module md:clustertarget){
@@ -485,6 +498,7 @@ public class VariabilityModuleSystem {
 	private void mergeoptionalcluster(int merge_sourceclusterid, int merge_targetclusterid){
 		assert this.optionalclusterres.containsKey(merge_sourceclusterid);
 		assert this.optionalclusterres.containsKey(merge_targetclusterid);
+		System.out.println("[optional:] merge: \t"+merge_sourceclusterid+"\t and \t"+merge_targetclusterid);
 		Set<Module> clustersource = this.optionalclusterres.get(merge_sourceclusterid);
 		Set<Module> clustertarget = this.optionalclusterres.get(merge_targetclusterid);
 		for(Module md:clustertarget){
@@ -519,7 +533,7 @@ public class VariabilityModuleSystem {
 		double sourcesm = 0;// sources(m)
 		double totaltopic_sim = 0;
 		assert this.dtItemMap.containsKey(module);
-		DocTopicItem moduledoc = this.dtItemMap.get(module);
+		DocTopicItem sourcemoduletopic = this.dtItemMap.get(module);
 		int sourceindex = module.getIndex();
 		double [] source_typeref_vector = typecheckref[sourceindex];
 		double [] source_method_vector = methodref[sourceindex];
@@ -546,7 +560,7 @@ public class VariabilityModuleSystem {
 				continue;
 			int targetindex = md.getIndex();
 			assert this.dtItemMap.containsKey(md);
-			DocTopicItem mddoc = this.dtItemMap.get(md);
+			DocTopicItem targetmoduletopic = this.dtItemMap.get(md);
 			double [] target_typeref_vector = typecheckref[targetindex];
 			double [] target_method_vector = methodref[targetindex];
 			
@@ -568,7 +582,8 @@ public class VariabilityModuleSystem {
 			}
 			
 			// topic laten dirichlet allocation
-			double distance_method = MathUtil.cosineSimilarity(source_method_vector, target_method_vector);
+			double distance_method = TopicUtil.cosineSimilarity(sourcemoduletopic, targetmoduletopic);
+			
 			totaltopic_sim+=distance_method;
 			
 		}
@@ -576,12 +591,19 @@ public class VariabilityModuleSystem {
 		// average totaltopic_sim
 		double avg_totaltopic_sim = totaltopic_sim/cluster.size();
 		// average  reference method
-		double avg_refercen_sim = (1+methodref_moduletocluster_count)/targetm * methodref_clustertomodule_count/sourcesm;
+		
 		// average type reference sim
 		double avg_typeref_sim = (typeref_clustertomodule_count+typeref_moduletocluster_count)/2*cluster.size();
 		
-		double partialresult = avg_totaltopic_sim+avg_refercen_sim-avg_totaltopic_sim*avg_refercen_sim;
-		overalldistance = partialresult+avg_typeref_sim-partialresult*avg_typeref_sim;
+		double partialresult = avg_totaltopic_sim+avg_typeref_sim-avg_totaltopic_sim*avg_typeref_sim;
+		
+		
+		if(targetm==0||sourcesm==0){
+			overalldistance = partialresult;
+		}else{
+			double avg_refercen_sim = (1+methodref_moduletocluster_count)/targetm * (1+methodref_clustertomodule_count)/sourcesm;
+			overalldistance = partialresult+avg_typeref_sim-partialresult*avg_typeref_sim;
+		}
 		
 		return overalldistance;
 	}

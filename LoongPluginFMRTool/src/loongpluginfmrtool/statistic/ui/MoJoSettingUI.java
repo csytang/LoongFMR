@@ -209,7 +209,7 @@ public class MoJoSettingUI extends TitleAreaDialog {
 					String sourcefile = recoveryResultTextContent.getText().trim();
 					String targetfile = groundTruthTextContent.getText().trim();
 					MoJoCalculator cal = new MoJoCalculator(sourcefile,targetfile,null);
-					double resultvalue = cal.mojofm();
+					double resultvalue = cal.mojo();
 					lblValue.setText(resultvalue+"");
 				}
 			}

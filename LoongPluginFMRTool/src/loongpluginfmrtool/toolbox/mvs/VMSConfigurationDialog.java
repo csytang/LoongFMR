@@ -164,6 +164,9 @@ public class VMSConfigurationDialog extends Dialog {
 					comboIndextoMethod.put(i, allmethodsselected.get(i));
 				}
 				
+				
+				comboEntranceMethod.update();
+				
 			}
 		});
 		new Label(container, SWT.NONE);

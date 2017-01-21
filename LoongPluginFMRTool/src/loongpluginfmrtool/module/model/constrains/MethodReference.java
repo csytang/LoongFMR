@@ -42,6 +42,8 @@ public class MethodReference {
 				// get all method bindings
 				Set<IMethodBinding> methodbindings = finder.getMethodBinding();
 				for(IMethodBinding bind:methodbindings){
+					if(bind==null)
+						continue;
 					LElement element = alElementfactory.getElement(bind);
 					if(element!=null){
 						methods_elements.add(element);
