@@ -17,6 +17,7 @@ import loongpluginfmrtool.module.model.configuration.ConfigurationCondition;
 import loongpluginfmrtool.module.model.configuration.ConfigurationEntry;
 import loongpluginfmrtool.module.model.configuration.ConfigurationOption;
 import loongpluginfmrtool.module.model.module.Module;
+import loongpluginfmrtool.module.model.module.ModuleBuilder;
 import loongpluginfmrtool.util.ASTVisitorLElementVisitor;
 
 public class LinkerAndConditionalConstrains {
@@ -28,7 +29,8 @@ public class LinkerAndConditionalConstrains {
 	private Map<ConfigurationCondition,Set<LElement>>rawdisableconstrains = new HashMap<ConfigurationCondition,Set<LElement>>();
 	
 	private LFlyweightElementFactory alElementfactory;
-	
+	private Set<Module>enabledModule = new HashSet<Module>();
+	private Set<Module>disabledModule = new HashSet<Module>();
 	
 	protected ApplicationObserver AOB;
 	/**
@@ -92,6 +94,18 @@ public class LinkerAndConditionalConstrains {
 								for (LElement backwardElement : backwardElements) {
 									addconstraints(enableconstrains,exp,backwardElement);
 									addrawconstrains(rawenableconstrains,conficondi,backwardElement);
+									Module targetModule = ModuleBuilder.getModuleByLElement(backwardElement);
+									if(targetModule==null)
+									{
+										try {
+											throw new Exception("Unknow module for element:"+backwardElement.getASTID());
+										} catch (Exception e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+									}
+									if(!backwardElement.equals(amodule))
+										enabledModule.add(ModuleBuilder.getModuleByLElement(backwardElement));
 								}
 							}
 						}
@@ -114,6 +128,18 @@ public class LinkerAndConditionalConstrains {
 								for (LElement backwardElement : backwardElements) {
 									addconstraints(unableconstrains,exp,backwardElement);
 									addrawconstrains(rawdisableconstrains,conficondi,backwardElement);
+									Module targetModule = ModuleBuilder.getModuleByLElement(backwardElement);
+									if(targetModule==null)
+									{
+										try {
+											throw new Exception("Unknow module for element:"+backwardElement.getASTID());
+										} catch (Exception e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+									}
+									if(!backwardElement.equals(amodule))
+										disabledModule.add(ModuleBuilder.getModuleByLElement(backwardElement));
 								}
 							}
 						}
@@ -126,7 +152,14 @@ public class LinkerAndConditionalConstrains {
 				 * this will add the constrain at the module level
 				 * by referencing enabled and disabled constrains
 				 */
-				
+				for(Module enmd:enabledModule){
+					for(Module dismd:disabledModule){
+						if(!enmd.equals(dismd)){
+							enmd.addConflictWith(dismd);
+							dismd.addConflictWith(enmd);
+						}
+					}
+				}
 				
 				
 			}
