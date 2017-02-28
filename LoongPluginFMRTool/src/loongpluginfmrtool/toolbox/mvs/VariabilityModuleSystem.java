@@ -433,7 +433,7 @@ public class VariabilityModuleSystem {
 							}
 							Set<Module> target_optionalmodules = entry_target.getValue();
 							double simiarity = computesimiarity(source_optionalmodules,target_optionalmodules);
-							if(simiarity > maxsim){
+							if(simiarity > maxsim && simiarity>0){// the negative similarity represent the conflict from modules
 								sourceIdToMerge = source_optionalindex;
 								targetIdToMerge = target_optionalindex;
 								maxsim = simiarity;
@@ -514,7 +514,11 @@ public class VariabilityModuleSystem {
 	private double computesimiarity(Set<Module> cluster,Set<Module>othercluster){
 		// complete-linkage agglomerative algorithm
 		double averagedisance = 0.0;
+		double valueconflict = Double.NEGATIVE_INFINITY;
 		for(Module md:cluster){
+			if(hasconflict(md,othercluster)){// check the type constrains
+				return valueconflict;
+			}
 			double mddistance = getAverage(md,othercluster);
 			averagedisance += mddistance;
 		}
@@ -522,7 +526,24 @@ public class VariabilityModuleSystem {
 		return averagedisance;
 	}
 	
-	
+	/**
+	 * In this method, we will check whether there is a type constraints
+	 * @param md
+	 * @param othercluster
+	 * @return
+	 */
+	private boolean hasconflict(Module md, Set<Module> othercluster) {
+		for(Module mdother:othercluster){
+			if(md.hasLinkConflictWith(mdother)){
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+
+
 	private double getAverage(Module module, Set<Module> cluster){
 		
 		double methodref_moduletocluster_count = 0;// targets(m) N f

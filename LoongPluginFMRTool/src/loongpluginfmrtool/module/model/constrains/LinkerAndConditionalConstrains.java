@@ -120,6 +120,15 @@ public class LinkerAndConditionalConstrains {
 					
 					}
 				}
+				
+				// add the constrains at the module level
+				/**
+				 * this will add the constrain at the module level
+				 * by referencing enabled and disabled constrains
+				 */
+				
+				
+				
 			}
 		}
 	}

@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -51,7 +52,7 @@ public class Module implements Serializable {
 	private ModuleModel model = null;
 	private IProject aProject = null;
 	private Map<Module,Integer> module_calldependency = new HashMap<Module,Integer>();
-	
+	private Set<Module> conflictmoduleset = new HashSet<Module>();
 	
 	/************external configuration options********/
 	// here lists the configuration options from others
@@ -381,6 +382,19 @@ public class Module implements Serializable {
 			}
 		}
 		return false;
+	}
+
+	public boolean hasLinkConflictWith(Module mdother) {
+		return conflictmoduleset.contains(mdother);
+	}
+	
+	public void addConflictWith(Module mdother){
+		conflictmoduleset.add(mdother);
+	}
+	
+	public void removeConflictWith(Module mdother){
+		if(conflictmoduleset.contains(mdother))
+			conflictmoduleset.remove(mdother);
 	}
 
 	
