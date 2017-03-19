@@ -7,3 +7,5 @@ branches:
  only:
    - master
  
+install:
+  mvn install
