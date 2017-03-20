@@ -68,7 +68,9 @@ Bundle-ClassPath: .,
  xercesImpl.jar,
  xml-apis.jar,
  xom.jar,
- xstream-1.4.9.jar
+ xstream-1.4.9.jar,
+ Loong.jar,
+ org.eclipse.core.resources_3.10.1.v20150725-1910.jar
 Require-Bundle: org.eclipse.ui.workbench,
  org.eclipse.osgi,
  org.eclipse.core.runtime;bundle-version="3.11.1",
