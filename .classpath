@@ -72,5 +72,20 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="org.eclipse.core.filebuffers_3.5.300.v20130225-1821.jar"/>
+	<classpathentry kind="lib" path="org.eclipse.jdt.core_3.9.2.v20140114-1555.jar"/>
+	<classpathentry kind="lib" path="org.eclipse.jface_3.9.1.v20130725-1141.jar"/>
+	<classpathentry kind="lib" path="org.eclipse.jface.databinding_1.6.200.v20130515-1857.jar"/>
+	<classpathentry kind="lib" path="org.eclipse.jface.text_3.8.101.v20130802-1147.jar"/>
+	<classpathentry kind="lib" path="org.eclipse.text_3.5.0.jar"/>
+	<classpathentry kind="lib" path="org.eclipse.uml2_5.2.0.v20160516-0939.jar"/>
+	<classpathentry kind="lib" path="org.sat4j.core.jar"/>
+	<classpathentry kind="lib" path="ui-3.3.0-v20070607-0010.jar"/>
+	<classpathentry kind="lib" path="xom-1.2.10-src.jar"/>
+	<classpathentry kind="lib" path="xom.jar"/>
+	<classpathentry kind="lib" path="xstream-1.4.2.jar"/>
+	<classpathentry kind="lib" path="Loong.jar"/>
+	<classpathentry kind="lib" path="org.eclipse.core.resources.source_3.10.1.v20150725-1910.jar"/>
+	<classpathentry kind="lib" path="org.eclipse.jdt.core_3.11.2.v20160128-0629.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
