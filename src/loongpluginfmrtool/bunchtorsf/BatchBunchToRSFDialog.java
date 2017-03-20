@@ -8,13 +8,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 
 import edu.usc.softarch.arcade.facts.driver.BunchClusterToRsfClusterConverter;
 
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.*;
 import org.eclipse.jface.viewers.ListViewer;
 
 public class BatchBunchToRSFDialog extends TitleAreaDialog {
