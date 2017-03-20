@@ -77,7 +77,8 @@ Bundle-ClassPath: .,
  org.eclipse.ui.views_3.8.0.v20150422-0725.jar,
  org.eclipse.draw2d_3.10.1.201508170204.jar,
  org.eclipse.jdt.ui_3.11.2.v20151123-1510.jar,
- org.eclipse.ui.ide_3.11.0.v20150825-2158.jar
+ org.eclipse.ui.ide_3.11.0.v20150825-2158.jar,
+ org.eclipse.ui.workbench_3.107.1.v20160120-2131.jar
 Require-Bundle: org.eclipse.ui.workbench,
  org.eclipse.osgi,
  org.eclipse.ui;bundle-version="3.107.0",
