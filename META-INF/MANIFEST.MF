@@ -4,19 +4,6 @@ Bundle-Name: LoongPluginFMRTool
 Bundle-SymbolicName: LoongPlugin.FMRTool;singleton:=true
 Bundle-Version: 1.0.0
 Bundle-Activator: loongpluginfmrtool.LoongPluginFMRTool
-Require-Bundle: org.eclipse.ui.editors;bundle-version="3.8.200",
- org.eclipse.jdt.core;bundle-version="3.11.2",
- org.eclipse.jdt.ui;bundle-version="3.11.2",
- org.eclipse.jface;bundle-version="3.10.0",
- org.eclipse.ui.ide;bundle-version="3.10.0",
- org.eclipse.core.resources;bundle-version="3.10.1",
- org.eclipse.ui;bundle-version="3.107.0",
- org.eclipse.core.runtime;bundle-version="3.10.0",
- org.eclipse.gef,
- org.eclipse.core.filesystem,
- LoongPlugin;bundle-version="1.0.0",
- org.eclipse.osgi,
- org.eclipse.ui.workbench
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: xstream-1.4.2.jar,
@@ -135,4 +122,7 @@ Bundle-ClassPath: xstream-1.4.2.jar,
  org.sat4j.core.jar,
  ui-3.3.0-v20070607-0010.jar,
  org.eclipse.core.resources.source_3.10.1.v20150725-1910.jar,
- org.eclipse.jdt.core_3.11.2.v20160128-0629.jar
+ org.eclipse.jdt.core_3.11.2.v20160128-0629.jar,
+ org.eclipse.core.runtime_3.11.1.v20150903-1804.jar
+Require-Bundle: org.eclipse.ui.workbench,
+ org.eclipse.osgi
