@@ -83,5 +83,6 @@
 	<classpathentry kind="lib" path="org.eclipse.core.resources.source_3.10.1.v20150725-1910.jar"/>
 	<classpathentry kind="lib" path="org.eclipse.jdt.core_3.11.2.v20160128-0629.jar"/>
 	<classpathentry kind="lib" path="org.eclipse.core.runtime_3.11.1.v20150903-1804.jar"/>
+	<classpathentry kind="lib" path="org.eclipse.osgi_3.10.102.v20160118-1700.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

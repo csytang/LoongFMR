@@ -123,6 +123,7 @@ Bundle-ClassPath: xstream-1.4.2.jar,
  ui-3.3.0-v20070607-0010.jar,
  org.eclipse.core.resources.source_3.10.1.v20150725-1910.jar,
  org.eclipse.jdt.core_3.11.2.v20160128-0629.jar,
- org.eclipse.core.runtime_3.11.1.v20150903-1804.jar
+ org.eclipse.core.runtime_3.11.1.v20150903-1804.jar,
+ org.eclipse.osgi_3.10.102.v20160118-1700.jar
 Require-Bundle: org.eclipse.ui.workbench,
  org.eclipse.osgi
