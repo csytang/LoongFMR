@@ -76,12 +76,20 @@
 	<classpathentry kind="lib" path="xml-apis.jar"/>
 	<classpathentry kind="lib" path="xom.jar"/>
 	<classpathentry kind="lib" path="xstream-1.4.9.jar"/>
+	<classpathentry kind="lib" path="org.eclipse.core.resources_3.10.1.v20150725-1910.jar"/>
+	<classpathentry kind="lib" path="Loong.jar"/>
+	<classpathentry kind="lib" path="org.eclipse.swt_3.104.2.v20160212-1350.jar"/>
+	<classpathentry kind="lib" path="org.eclipse.ui_3.107.0.v20150507-1945.jar"/>
+	<classpathentry kind="lib" path="org.eclipse.ui.views_3.8.0.v20150422-0725.jar"/>
+	<classpathentry kind="lib" path="org.eclipse.gef_3.10.1.201508170204.jar"/>
+	<classpathentry kind="lib" path="org.eclipse.draw2d_3.10.1.201508170204.jar"/>
+	<classpathentry kind="lib" path="org.eclipse.jdt.ui_3.11.2.v20151123-1510.jar"/>
+	<classpathentry kind="lib" path="org.eclipse.ui.ide_3.11.0.v20150825-2158.jar"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="org.eclipse.core.resources_3.10.1.v20150725-1910.jar"/>
-	<classpathentry kind="lib" path="Loong.jar"/>
+	<classpathentry kind="lib" path="org.eclipse.ui.workbench_3.107.1.v20160120-2131.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
